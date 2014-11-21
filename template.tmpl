@@ -2,26 +2,26 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>{{name}} | sitename </title>
-        <link rel="stylesheet" type="text/css" href="/css/main.css#{{version}}">
+        <title>{{.name}} | sitename </title>
+        <link rel="stylesheet" type="text/css" href="/css/main.css#{{.version}}">
     </head>
     <body>
 
         <header>
             <h2>Site Title or Logo</h2>
             <nav>
-                <ul>{{range navigation}}
-                    <li><a href='{{link}}'>{{name}}</a></li>
+                <ul>{{range .navigation}}
+                    <li><a href='{{.link}}'>{{.name}}</a></li>
                 {{end}}</ul>
             </nav>
         </header>
 
-        <div class="content">{{content}}</div>
+        <div class="content">{{.content}}</div>
 
         <div class="footer">
             <p>Worthless copyrights, or maybe useful contact information.</p>
             <div class="scripts">
-                <script type="text/javascript" src="/js/main.js#{{version}}"></script>
+                <script type="text/javascript" src="/js/main.js#{{.version}}"></script>
             </div>
         </div>
 
