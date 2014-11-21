@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,7 +33,7 @@ func exists(path string) (bool, error) {
 
 // if within a git repo, gets git version as a short-hash
 // otherwise falls back to a unix timestamp
-func Version() string {
+func version() string {
 	version := strconv.FormatInt(time.Now().Unix(), 10)
 	out, err := exec.Command("sh", "-c", "git rev-parse --short HEAD").Output()
 	if err == nil {
@@ -41,21 +42,29 @@ func Version() string {
 	return version
 }
 
+// remove the extension from a given filename
+func basename(name string) string {
+	return filepath.Base(strings.TrimSuffix(name, filepath.Ext(name)))
+}
+
 func main() {
 
-	// prepare staticmd with dependencies
+	// get current directory
+	cwd, _ := os.Getwd()
+
+	// prepare staticmd with dependencies & defaults
 	staticmd := Staticmd{
-		Logger: log.Logger{Level: log.Error},
+		Logger:         log.Logger{Level: log.Error},
 		Subdirectories: make(map[string][]string),
 		Indexes:        make(map[string][]string),
+		Version:        version(),
+		Input:          cwd,
+		Output:         filepath.Join(cwd, "public/"),
 	}
 
 	// optimize concurrent processing
 	staticmd.MaxParallelism = runtime.NumCPU()
 	runtime.GOMAXPROCS(staticmd.MaxParallelism)
-
-	// get current directory
-	cwd, _ := os.Getwd()
 
 	// prepare cli options
 	appOptions := option.App{Description: "command line tool for generating deliverable static content"}
@@ -71,10 +80,16 @@ func main() {
 	flags := appOptions.Parse()
 
 	// apply flags
-	staticmd.Template, _ = maps.String(&flags, staticmd.Template, "template")
-	staticmd.Input, _ = maps.String(&flags, cwd, "input")
-	staticmd.Output, _ = maps.String(&flags, filepath.Join(cwd, "public/"), "output")
+	t, _ := maps.String(&flags, "", "template")
+	if tmpl, err := template.ParseFiles(t); err != nil {
+		staticmd.Logger.Error("Failed to open template: %s", err)
+	} else {
+		staticmd.Template = *tmpl
+	}
+	staticmd.Input, _ = maps.String(&flags, staticmd.Input, "input")
+	staticmd.Output, _ = maps.String(&flags, staticmd.Output, "output")
 	staticmd.Book, _ = maps.Bool(&flags, staticmd.Book, "book")
+	staticmd.Relative, _ = maps.Bool(&flags, staticmd.Relative, "relative")
 
 	// sanitize input & output
 	staticmd.Input, _ = filepath.Abs(staticmd.Input)
@@ -104,15 +119,10 @@ func main() {
 	}
 	staticmd.Logger.Debug("Pages: %+v", staticmd.Pages)
 
-	// build indexes (includes navigation)
-	staticmd.Index()
-	staticmd.Logger.Debug("Navigation: %+v", staticmd.Navigation)
-	staticmd.Logger.Debug("Indexes: %+v", staticmd.Indexes)
-
-	// parse files
+	// build
 	if staticmd.Book {
-		staticmd.BuildSingle()
+		staticmd.Single()
 	} else {
-		staticmd.BuildMulti()
+		staticmd.Multi()
 	}
 }
