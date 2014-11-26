@@ -42,7 +42,7 @@ func version() string {
 	return version
 }
 
-// remove the extension from a given filename
+// remove the path and extension from a given filename
 func basename(name string) string {
 	return filepath.Base(strings.TrimSuffix(name, filepath.Ext(name)))
 }
@@ -55,8 +55,6 @@ func main() {
 	// prepare staticmd with dependencies & defaults
 	staticmd := Staticmd{
 		Logger:         log.Logger{Level: log.Error},
-		Subdirectories: make(map[string][]string),
-		Indexes:        make(map[string][]string),
 		Version:        version(),
 		Input:          cwd,
 		Output:         filepath.Join(cwd, "public/"),
@@ -83,6 +81,7 @@ func main() {
 	t, _ := maps.String(&flags, "", "template")
 	if tmpl, err := template.ParseFiles(t); err != nil {
 		staticmd.Logger.Error("Failed to open template: %s", err)
+		os.Exit(1)
 	} else {
 		staticmd.Template = *tmpl
 	}
@@ -114,6 +113,7 @@ func main() {
 	// print debug status
 	staticmd.Logger.Debug("Staticmd State: %+v", staticmd)
 
+	// walk the file system
 	if err := filepath.Walk(staticmd.Input, staticmd.Walk); err != nil {
 		staticmd.Logger.Error("failed to walk directory: %s", err)
 	}
