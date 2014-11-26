@@ -6,7 +6,12 @@ This is a golang project for a command that generates static html output from ma
 
 ## alternatives
 
-I was lazy this time and haven't checked, but there exist a few tools in other languages like [node; harp.js](http://harpjs.com/).
+Other tools exist, not limited to the golang language:
+
+- [node; harp.js](http://harpjs.com/).
+- [golang; hugo](http://gohugo.io/)
+
+_My project was for educational purposes, and to provide a much more basic utility than the above options._
 
 
 ## sales pitch
