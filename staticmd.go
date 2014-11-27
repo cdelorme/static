@@ -1,16 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"html/template"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
-	// "bufio"
-	// "io/ioutil"
-	// "path"
-
-	// "github.com/russross/blackfriday"
+	"github.com/russross/blackfriday"
 
 	"github.com/cdelorme/go-log"
 )
@@ -24,137 +23,152 @@ type Staticmd struct {
 	Relative       bool
 	MaxParallelism int
 	Version        string
-	Navigation     []string
 	Pages          []string
-	Subdirectories map[string][]string
-	Indexes        map[string][]string
 }
 
-// search for readme or fallback to index
-func (staticmd *Staticmd) index(pages []string) string {
-	for _, page := range pages {
-		if n := basename(page); n == "readme" {
-			return n
+// convert markdown input path to html output path
+func (staticmd *Staticmd) ior(path string) string {
+	return strings.TrimSuffix(strings.Replace(path, staticmd.Input, staticmd.Output, 1), filepath.Ext(path)) + ".html"
+}
+
+// for relative rendering generate relative depth string, or fallback to empty
+func (staticmd *Staticmd) depth(path string) string {
+	if staticmd.Relative {
+		if rel, err := filepath.Rel(filepath.Dir(path), staticmd.Output); err == nil {
+			return rel
 		}
 	}
-	return "index"
+	return ""
 }
 
+// get link to file, with support for relative path linking
+func (staticmd *Staticmd) link(path string) string {
+	if staticmd.Relative {
+		return strings.TrimPrefix(path, filepath.Dir(path))
+	}
+	return strings.TrimPrefix(path, staticmd.Output)
+}
+
+// walk the directories and build a list of pages
 func (staticmd *Staticmd) Walk(path string, file os.FileInfo, err error) error {
+
+	// only pay attention to files with a size greater than 0
 	if file == nil {
-	} else if file.IsDir() {
-
-		// prepare path to create for matching output
-		mkd := filepath.Join(staticmd.Output, strings.TrimPrefix(path, staticmd.Input))
-
-		// include parent output path
-		if path == staticmd.Input {
-			mkd = staticmd.Output
-		} else {
-
-			// note subdirectory for indexing
-			if _, ok := staticmd.Subdirectories[filepath.Dir(path)]; !ok {
-				staticmd.Subdirectories[filepath.Dir(path)] = make([]string, 0)
-			}
-			staticmd.Subdirectories[filepath.Dir(path)] = append(staticmd.Subdirectories[filepath.Dir(path)], path)
-		}
-
-		// create all matching output paths
-		staticmd.Logger.Debug("creating matching output path: %s", mkd)
-		if err := os.MkdirAll(mkd, 0770); err != nil {
-			staticmd.Logger.Error("failed to create matching output path: %s, %s", path, err)
-		}
-
 	} else if file.Mode().IsRegular() && file.Size() > 0 {
 
-		// append all markdown files to our pages list
+		// only add markdown files to our pages array (.md, .mkd, .markdown)
 		if strings.HasSuffix(path, ".md") || strings.HasSuffix(path, ".mkd") || strings.HasSuffix(path, ".markdown") {
 			staticmd.Pages = append(staticmd.Pages, path)
-
-			dir := filepath.Dir(path)
-
-			// append to navigation, index
-			if dir == staticmd.Input {
-				staticmd.Navigation = append(staticmd.Navigation, path)
-			} else {
-
-				// prepare index container
-				if _, ok := staticmd.Indexes[dir]; !ok {
-					staticmd.Indexes[dir] = make([]string, 0)
-				}
-				staticmd.Indexes[dir] = append(staticmd.Indexes[dir], dir+basename(strings.TrimPrefix(path, staticmd.Input))+".html")
-			}
 		}
 	}
 	return err
 }
 
+// build output concurrently to many pages
 func (staticmd *Staticmd) Multi() {
 
-	// test filepath.Rel()
+	// prepare navigation storage
+	navigation := make(map[string][]Navigation)
 
-	// iterate all subdirectories to find index/readme and append to
-	// for i, _ := range staticmd.Subdirectories {
-	// 	for _, d := range staticmd.Subdirectories[i] {
-
-	// 		// can only append to indexes that exist
-	// 		if _, ok := staticmd.Indexes[filepath.Dir(staticmd.Subdirectories[i][d])]; !ok {
-	// 			continue
-	// 		}
-
-	// 		// determine whether to append relative path or just the folder
-	// 		if staticmd.Relative {
-
-	// 			// trim input path, and append to indexes as .html
-	// 			idx := staticmd.index(staticmd.Subdirectories[i][d])
-	// 			staticmd.Subdirectories[i][d]+idx+".html"
-
-	// 			// determine whether index or readme exists, assume index
-	// 		} else {
-	// 			// simply append `subfolder/`
-	// 		}
-	// 	}
-	// }
-
-	// rebuild navigation pathing
-	// for i, page := range staticmd.Navigation {
-	// 	if staticmd.Relative {
-	// 		staticmd.Navigation[i] = strings.TrimPrefix(strings.TrimPrefix(page, staticmd.Input), "/")
-	// 	} else if basename(page) == "index" {
-	// 		staticmd.Navigation[i] = "/"
-	// 	} else {
-	// 		staticmd.Navigation[i] = strings.TrimPrefix(page, staticmd.Input)
-	// 	}
-	// }
-
-	// debug output
-	staticmd.Logger.Debug("Navigation: %+v", staticmd.Navigation)
-	staticmd.Logger.Debug("Indexes: %+v", staticmd.Indexes)
-
-	// concurrently build pages
-
-}
-
-func (staticmd *Staticmd) Single() {
-
-	// open single index.html for building
-	file := staticmd.Output
-
-	// prepare index
-	index := make([]string, 0)
-
-	// prepare markdown thingy?
-	// content := template.HTML(blackfriday.MarkdownCommon(markdown))
-
-	// synchronously build one output file
+	// loop pages to build table of contents
 	for i, _ := range staticmd.Pages {
 
-		// create index record
+		// build output directory
+		out := staticmd.ior(staticmd.Pages[i])
+		dir := filepath.Dir(staticmd.ior(out))
 
-		// staticmd.Pages[i]
-		// append each file to content
+		// build indexes first-match
+		if _, ok := navigation[dir]; !ok {
+			navigation[dir] = make([]Navigation, 0)
+
+			// create output directory for when we create files
+			if ok, _ := exists(dir); !ok {
+				if err := os.MkdirAll(dir, 0770); err != nil {
+					staticmd.Logger.Error("Failed to create path: %s, %s", dir, err)
+				}
+			}
+		}
+
+		// create a new navigation object
+		nav := Navigation{
+			Name: basename(out),
+			Link: staticmd.link(out),
+		}
+
+		// append files to their respective directories
+		navigation[dir] = append(navigation[dir], nav)
 	}
 
-	// append index
+	// @todo second cycle to clarify whether index or readme for table-of-contents
+
+	// debug output
+	staticmd.Logger.Debug("Navigation: %+v", navigation)
+
+	// prepare waitgroup, bufferer channel, and add number of async handlers to wg
+	var wg sync.WaitGroup
+	pages := make(chan string, staticmd.MaxParallelism)
+	wg.Add(staticmd.MaxParallelism)
+
+	// prepare workers
+	for i := 0; i < staticmd.MaxParallelism; i++ {
+		go func() {
+			defer wg.Done()
+
+			// iterate supplied pages
+			for p := range pages {
+
+				// acquire output filepath
+				out := staticmd.ior(p)
+				// dir := filepath.Dir(out)
+
+				// prepare a new page object for our template to render
+				page := Page{
+					Name:    basename(p),
+					Version: staticmd.Version,
+					Nav:     navigation[staticmd.Output],
+					Depth:   staticmd.depth(p),
+				}
+
+				// read in page text
+				if markdown, err := ioutil.ReadFile(p); err == nil {
+
+					// conditionally prepend table of contents?
+
+					page.Content = template.HTML(blackfriday.MarkdownCommon(markdown))
+				} else {
+					staticmd.Logger.Error("failed to read file: %s, %s", p, err)
+				}
+
+				// translate input path to output path & create a write context
+				if f, err := os.Create(out); err == nil {
+					fb := bufio.NewWriter(f)
+					defer fb.Flush()
+					defer f.Close()
+
+					// attempt to use template to write output with page context
+					if e := staticmd.Template.Execute(fb, page); e != nil {
+						staticmd.Logger.Error("Failed to write template: %s, %s", out, e)
+					}
+				} else {
+					staticmd.Logger.Error("failed to create new file: %s, %s", out, err)
+				}
+			}
+		}()
+	}
+
+	// send pages to workers for async rendering
+	for _, page := range staticmd.Pages {
+		pages <- page
+	}
+
+	// close channel and wait for async to finish before continuing
+	close(pages)
+	wg.Wait()
+}
+
+// build output synchronously to a single page
+func (staticmd *Staticmd) Single() {
+
+	// still determining strategy
 
 }
