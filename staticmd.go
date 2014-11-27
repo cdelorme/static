@@ -164,6 +164,7 @@ func (staticmd *Staticmd) Multi() {
 						markdown = append([]byte(toc), markdown...)
 					}
 
+					// convert to html, and accept as part of the template
 					page.Content = template.HTML(blackfriday.MarkdownCommon(markdown))
 				} else {
 					staticmd.Logger.Error("failed to read file: %s, %s", p, err)
@@ -192,8 +193,8 @@ func (staticmd *Staticmd) Multi() {
 	}
 
 	// send pages to workers for async rendering
-	for _, page := range staticmd.Pages {
-		pages <- page
+	for i, _ := range staticmd.Pages {
+		pages <- staticmd.Pages[i]
 	}
 
 	// close channel and wait for async to finish before continuing
@@ -204,6 +205,78 @@ func (staticmd *Staticmd) Multi() {
 // build output synchronously to a single page
 func (staticmd *Staticmd) Single() {
 
-	// still determining strategy
+	// prepare []byte array to store all files markdown
+	content := make([]byte, 0)
 
+	// prepare a table-of-contents
+	toc := "\n"
+
+	// iterate and append all files contents
+	for _, p := range staticmd.Pages {
+
+		// shorthand
+		shorthand := strings.TrimPrefix(p, staticmd.Input+string(os.PathSeparator))
+
+		// acquire depth
+		depth := strings.Count(shorthand, string(os.PathSeparator))
+
+		// prepare anchor text
+		anchor := strings.Replace(shorthand, string(os.PathSeparator), "-", -1)
+
+		// create new toc record
+		toc = toc + strings.Repeat("\t", depth) + "- [" + basename(p) + "](#" + anchor + ")\n"
+
+		// read markdown from file or skip to next file
+		markdown, err := ioutil.ReadFile(p)
+		if err != nil {
+			staticmd.Logger.Error("failed to read file: %s, %s", p, err)
+			continue
+		}
+
+		// prepend anchor to content
+		markdown = append([]byte("\n<a id='" + anchor + "'/>\n\n"), markdown...)
+
+		// append a "back-to-top" anchor
+		markdown = append(markdown, []byte("\n[back to top](#top)\n\n")...)
+
+		// append to content
+		content = append(content, markdown...)
+	}
+
+	// prepend toc
+	content = append([]byte(toc), content...)
+
+	// create page object with version & content
+	page := Page{
+		Version: staticmd.Version,
+		Content: template.HTML(blackfriday.MarkdownCommon(content)),
+	}
+
+	staticmd.Logger.Info("page: %+v", page)
+
+	// prepare output directory
+	if ok, _ := exists(staticmd.Output); !ok {
+		if err := os.MkdirAll(staticmd.Output, 0770); err != nil {
+			staticmd.Logger.Error("Failed to create path: %s, %s", staticmd.Output, err)
+		}
+	}
+
+	// prepare output file path
+	out := filepath.Join(staticmd.Output, "index.html")
+
+	// open file for output and run through template
+	if f, err := os.Create(out); err == nil {
+		defer f.Close()
+
+		// prepare a writer /w buffer
+		fb := bufio.NewWriter(f)
+		defer fb.Flush()
+
+		// attempt to use template to write output with page context
+		if e := staticmd.Template.Execute(fb, page); e != nil {
+			staticmd.Logger.Error("Failed to write template: %s, %s", out, e)
+		}
+	} else {
+		staticmd.Logger.Error("failed to create new file: %s, %s", out, err)
+	}
 }
