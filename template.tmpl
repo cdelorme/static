@@ -3,7 +3,7 @@
     <head>
         {{$depth := .Depth}}
         <meta charset="utf-8">
-        <title>{{.Name}} | sitename </title>
+        <title>{{if .Name}}{{.Name}} | {{end}}sitename </title>
         <link rel="stylesheet" type="text/css" href="{{$depth}}/css/main.css#{{.Version}}">
     </head>
     <body>
