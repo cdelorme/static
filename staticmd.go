@@ -27,6 +27,7 @@ type Staticmd struct {
 }
 
 // convert markdown input path to html output path
+// there is no reverse (because we support `.md`, `.mkd`, and `.markdown`)
 func (staticmd *Staticmd) ior(path string) string {
 	return strings.TrimSuffix(strings.Replace(path, staticmd.Input, staticmd.Output, 1), filepath.Ext(path)) + ".html"
 }
@@ -35,18 +36,10 @@ func (staticmd *Staticmd) ior(path string) string {
 func (staticmd *Staticmd) depth(path string) string {
 	if staticmd.Relative {
 		if rel, err := filepath.Rel(filepath.Dir(path), staticmd.Output); err == nil {
-			return rel
+			return rel+string(os.PathSeparator)
 		}
 	}
 	return ""
-}
-
-// get link to file, with support for relative path linking
-func (staticmd *Staticmd) link(path string) string {
-	if staticmd.Relative {
-		return strings.TrimPrefix(path, filepath.Dir(path))
-	}
-	return strings.TrimPrefix(path, staticmd.Output)
 }
 
 // walk the directories and build a list of pages
@@ -77,16 +70,35 @@ func (staticmd *Staticmd) Multi() {
 		out := staticmd.ior(staticmd.Pages[i])
 		dir := filepath.Dir(staticmd.ior(out))
 
-		// create a new navigation object
-		nav := Navigation{
-			Name: basename(out),
-			Link: staticmd.link(out),
-		}
+		// create navigation object
+		nav := Navigation{}
 
-		// handle special table-of-contents cases
-		if filepath.Dir(out) != staticmd.Output && strings.ToLower(nav.Name) == "index" {
+		// sub-index condition changes name, dir, and link
+		if filepath.Dir(out) != staticmd.Output && strings.ToLower(basename(out)) == "index" {
+
+			// set name to containing folder
 			nav.Name = basename(dir)
+
+			// set relative or absolute link
+			if staticmd.Relative {
+                nav.Link = filepath.Join(strings.TrimPrefix(dir, filepath.Dir(dir)+string(os.PathSeparator)), filepath.Base(out))
+			} else {
+				nav.Link = strings.TrimPrefix(dir, staticmd.Output)+string(os.PathSeparator)
+			}
+
+			// update dir to dir of dir
 			dir = filepath.Dir(dir)
+		} else {
+
+			// set name to files name
+			nav.Name = basename(out)
+
+			// set relative or absolute link
+			if staticmd.Relative {
+				nav.Link = strings.TrimPrefix(out, filepath.Dir(out)+string(os.PathSeparator))
+			} else {
+				nav.Link = strings.TrimPrefix(out, staticmd.Output)
+			}
 		}
 
 		// build indexes first-match
@@ -105,8 +117,8 @@ func (staticmd *Staticmd) Multi() {
 		navigation[dir] = append(navigation[dir], nav)
 	}
 
-	// debug output
-	staticmd.Logger.Debug("Navigation: %+v", navigation)
+	// debug navigation output
+	staticmd.Logger.Debug("navigation: %+v", navigation)
 
 	// prepare waitgroup, bufferer channel, and add number of async handlers to wg
 	var wg sync.WaitGroup
@@ -130,7 +142,7 @@ func (staticmd *Staticmd) Multi() {
 					Name:    basename(p),
 					Version: staticmd.Version,
 					Nav:     navigation[staticmd.Output],
-					Depth:   staticmd.depth(p),
+					Depth:   staticmd.depth(out),
 				}
 
 				// read in page text
