@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+        {{/* depth stored for access inside navigation loop */}}
         {{$depth := .Depth}}
         <meta charset="utf-8">
         <title>{{if .Name}}{{.Name}} | {{end}}sitename </title>
@@ -24,7 +25,7 @@
         <div class="content">{{.Content}}</div>
 
         <div class="footer">
-            <p>Worthless copyrights, or maybe useful contact information.</p>
+            <p>copyrights, reference links, contact information, etc...</p>
             <div class="scripts">
                 <script type="text/javascript" src="{{$depth}}/js/main.js#{{.Version}}"></script>
             </div>
