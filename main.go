@@ -54,10 +54,10 @@ func main() {
 
 	// prepare staticmd with dependencies & defaults
 	staticmd := Staticmd{
-		Logger:         log.Logger{Level: log.Error},
-		Version:        version(),
-		Input:          cwd,
-		Output:         filepath.Join(cwd, "public/"),
+		Logger:  log.Logger{Level: log.Error},
+		Version: version(),
+		Input:   cwd,
+		Output:  filepath.Join(cwd, "public/"),
 	}
 
 	// optimize concurrent processing
