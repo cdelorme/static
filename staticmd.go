@@ -211,6 +211,8 @@ func (staticmd *Staticmd) Single() {
 	// prepare a table-of-contents
 	toc := "\n"
 
+	previous_depth := 0
+
 	// iterate and append all files contents
 	for _, p := range staticmd.Pages {
 
@@ -219,6 +221,11 @@ func (staticmd *Staticmd) Single() {
 
 		// acquire depth
 		depth := strings.Count(shorthand, string(os.PathSeparator))
+
+		// if depth > previous depth then prepend with basename of dir for sub-section-headings
+		if depth > previous_depth {
+			toc = toc + strings.Repeat("\t", depth-1) + "- " + basename(filepath.Dir(p)) + "\n"
+		}
 
 		// prepare anchor text
 		anchor := strings.Replace(shorthand, string(os.PathSeparator), "-", -1)
@@ -241,6 +248,9 @@ func (staticmd *Staticmd) Single() {
 
 		// append to content
 		content = append(content, markdown...)
+
+		// update depth
+		previous_depth = depth
 	}
 
 	// prepend toc
