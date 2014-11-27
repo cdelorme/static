@@ -77,6 +77,18 @@ func (staticmd *Staticmd) Multi() {
 		out := staticmd.ior(staticmd.Pages[i])
 		dir := filepath.Dir(staticmd.ior(out))
 
+		// create a new navigation object
+		nav := Navigation{
+			Name: basename(out),
+			Link: staticmd.link(out),
+		}
+
+		// handle special table-of-contents cases
+		if filepath.Dir(out) != staticmd.Output && strings.ToLower(nav.Name) == "index" {
+			nav.Name = basename(dir)
+			dir = filepath.Dir(dir)
+		}
+
 		// build indexes first-match
 		if _, ok := navigation[dir]; !ok {
 			navigation[dir] = make([]Navigation, 0)
@@ -89,17 +101,9 @@ func (staticmd *Staticmd) Multi() {
 			}
 		}
 
-		// create a new navigation object
-		nav := Navigation{
-			Name: basename(out),
-			Link: staticmd.link(out),
-		}
-
-		// append files to their respective directories
+		// append to navigational list
 		navigation[dir] = append(navigation[dir], nav)
 	}
-
-	// @todo second cycle to clarify whether index or readme for table-of-contents
 
 	// debug output
 	staticmd.Logger.Debug("Navigation: %+v", navigation)
@@ -119,7 +123,7 @@ func (staticmd *Staticmd) Multi() {
 
 				// acquire output filepath
 				out := staticmd.ior(p)
-				// dir := filepath.Dir(out)
+				dir := filepath.Dir(out)
 
 				// prepare a new page object for our template to render
 				page := Page{
@@ -132,15 +136,29 @@ func (staticmd *Staticmd) Multi() {
 				// read in page text
 				if markdown, err := ioutil.ReadFile(p); err == nil {
 
-					// conditionally prepend table of contents?
+					// if this page happens to be a sub-index we can generate the table of contents
+					if dir != staticmd.Output && strings.ToLower(basename(p)) == "index" {
+
+						// iterate and build table of contents as basic markdown
+						toc := "\n## Table of Contents:\n\n"
+						for i, _ := range navigation[dir] {
+							toc = toc + "- [" + navigation[dir][i].Name + "](" + navigation[dir][i].Link + ")\n"
+						}
+
+						// debug table of contents output
+						staticmd.Logger.Debug("table of contents for %s, %s", out, toc)
+
+						// prepend table of contents
+						markdown = append([]byte(toc), markdown...)
+					}
 
 					page.Content = template.HTML(blackfriday.MarkdownCommon(markdown))
 				} else {
 					staticmd.Logger.Error("failed to read file: %s, %s", p, err)
 				}
 
-				// debug output
-				staticmd.Logger.Debug("Page: %+v", page)
+				// debug page output
+				staticmd.Logger.Debug("page: %+v", page)
 
 				// translate input path to output path & create a write context
 				if f, err := os.Create(out); err == nil {
