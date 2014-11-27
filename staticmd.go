@@ -139,11 +139,16 @@ func (staticmd *Staticmd) Multi() {
 					staticmd.Logger.Error("failed to read file: %s, %s", p, err)
 				}
 
+				// debug output
+				staticmd.Logger.Debug("Page: %+v", page)
+
 				// translate input path to output path & create a write context
 				if f, err := os.Create(out); err == nil {
+					defer f.Close()
+
+					// prepare a writer /w buffer
 					fb := bufio.NewWriter(f)
 					defer fb.Flush()
-					defer f.Close()
 
 					// attempt to use template to write output with page context
 					if e := staticmd.Template.Execute(fb, page); e != nil {
