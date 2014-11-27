@@ -19,8 +19,8 @@ _My project was for educational purposes, and to provide a much more basic utili
 The aim of this tool is to provide a simple command with sensible flags that will generate:
 
 - a full website
-- a relative-path local readme
-- a single file with an automated table of contents
+- a relative-pathed local readme
+- a single file with a table of contents
 
 It depends on:
 
@@ -53,11 +53,11 @@ It assumes an output path of `public/` relative to the execution path.
 
 Single page output will combine all files in the input path into a single output; something akin to a "book".  When this flag is selected the full table of contents is listed first; depth is applied based on the folder layout, and in the order which it was parsed.
 
-By default the application assumes absolute path starting at the parent directory.  The relative links option is for multi-page output (it is ignored when run in single-page mode) and will provide relative links to files and folders, including full paths (ex. it will not assume `/` points to `/index.html` and will fully generate the appropriate path).
+By default the application will assume absolute paths starting at the `output` directory.  If you use the `relative` flag it will use relative-path file names and rely on a depth parameter in the template.
 
 If run within a repository it will attempt to grab the short-hash from git as a version, otherwise it will use a unix timestamp.
 
-In a github fashion it assumes `readme.html` as the primary index; it will automatically prepend a table of contents to the `readme.md` or `index.md` files if either exists, otherwise it will create an `index.html` with just the relative files.
+It assumes the index will match `index.html`.  If no match is found no table of contents are created, and no references to that folders contents will be created, even if it contains markdown files.
 
 For multiple page generation it utilizies concurrency.  _When run in single-page mode it cannot build concurrently._
 
@@ -86,21 +86,21 @@ _For further details on command line operation, use the `--help` flag._
 
 ### template file
 
-A single template file can be used to generate all pages; even in single-page mode.
+A single template file can be used to generate all pages; even single-page output.
 
 The following variables are provided to the template file:
 
-- depth
-- version
-- navigation
-- content
+- Depth
+- Version
+- Nav
+- Content
 
-The `depth` property is for links you supply, such as to css and js assets.
+The `.Depth` property is for links you supply, such as to css and js assets.
 
-The `version` tag allows you to prevent caching of changed assets, such as css and js, but can also be supplied.
+The `.Version` tag allows you to prevent caching of changed assets, such as css and js, but can also be supplied.
 
-The `navigation` is a set of top-level links.  In single-page mode the navigation is omitted.
+The `.Nav` is a set of top-level links only.  In single-page mode the navigation is omitted.
 
-The `content` is the file contents converted to html, and may include prepended table of contents if the page is a `readme`, `index`, or from single-page mode output.
+The `.Content` is the file contents converted to html.  Any `index.html` files deeper than the output folder will automatically have a table of contents prepended to them.
 
 _Any binary assets such as images should be hosted on a CDN and have full paths.  If you need to supply a full offline version then use the single-page mode with this tool and print to pdf._
