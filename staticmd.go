@@ -36,7 +36,7 @@ func (staticmd *Staticmd) ior(path string) string {
 func (staticmd *Staticmd) depth(path string) string {
 	if staticmd.Relative {
 		if rel, err := filepath.Rel(filepath.Dir(path), staticmd.Output); err == nil {
-			return rel+string(os.PathSeparator)
+			return rel + string(os.PathSeparator)
 		}
 	}
 	return ""
@@ -81,9 +81,9 @@ func (staticmd *Staticmd) Multi() {
 
 			// set relative or absolute link
 			if staticmd.Relative {
-                nav.Link = filepath.Join(strings.TrimPrefix(dir, filepath.Dir(dir)+string(os.PathSeparator)), filepath.Base(out))
+				nav.Link = filepath.Join(strings.TrimPrefix(dir, filepath.Dir(dir)+string(os.PathSeparator)), filepath.Base(out))
 			} else {
-				nav.Link = strings.TrimPrefix(dir, staticmd.Output)+string(os.PathSeparator)
+				nav.Link = strings.TrimPrefix(dir, staticmd.Output) + string(os.PathSeparator)
 			}
 
 			// update dir to dir of dir
@@ -241,7 +241,7 @@ func (staticmd *Staticmd) Single() {
 		}
 
 		// prepend anchor to content
-		markdown = append([]byte("\n<a id='" + anchor + "'/>\n\n"), markdown...)
+		markdown = append([]byte("\n<a id='"+anchor+"'/>\n\n"), markdown...)
 
 		// append a "back-to-top" anchor
 		markdown = append(markdown, []byte("\n[back to top](#top)\n\n")...)
