@@ -1,27 +1,32 @@
 <!doctype html>
 <html lang="en">
     <head>
+        {{$depth := .Depth}}
         <meta charset="utf-8">
-        <title>{{.name}} | sitename </title>
-        <link rel="stylesheet" type="text/css" href="/css/main.css#{{.version}}">
+        <title>{{.Name}} | sitename </title>
+        <link rel="stylesheet" type="text/css" href="{{$depth}}/css/main.css#{{.Version}}">
     </head>
     <body>
 
         <header>
             <h2>Site Title or Logo</h2>
+            {{if .Nav}}
             <nav>
-                <ul>{{range .navigation}}
-                    <li><a href='{{.link}}'>{{.name}}</a></li>
-                {{end}}</ul>
+                <ul>
+                {{range .Nav}}
+                    <li><a href='{{$depth}}{{.Link}}'>{{.Name}}</a></li>
+                {{end}}
+                </ul>
             </nav>
+            {{end}}
         </header>
 
-        <div class="content">{{.content}}</div>
+        <div class="content">{{.Content}}</div>
 
         <div class="footer">
             <p>Worthless copyrights, or maybe useful contact information.</p>
             <div class="scripts">
-                <script type="text/javascript" src="/js/main.js#{{.version}}"></script>
+                <script type="text/javascript" src="{{$depth}}/js/main.js#{{.Version}}"></script>
             </div>
         </div>
 
