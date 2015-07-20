@@ -54,11 +54,12 @@ func main() {
 
 	// prepare staticmd with dependencies & defaults
 	staticmd := Staticmd{
-		Logger:  log.Logger{Level: log.Error},
+		Logger:  log.Logger{Severity: log.Error},
 		Version: version(),
 		Input:   cwd,
 		Output:  filepath.Join(cwd, "public/"),
 	}
+	staticmd.Logger.Color()
 
 	// optimize concurrent processing
 	staticmd.MaxParallelism = runtime.NumCPU()
@@ -96,7 +97,7 @@ func main() {
 
 	// optionally enable debugging
 	if debug, _ := maps.Bool(&flags, false, "debug"); debug {
-		staticmd.Logger.Level = log.Debug
+		staticmd.Logger.Severity = log.Debug
 	}
 
 	// optionally enable profiling
