@@ -79,29 +79,29 @@ func main() {
 	flags := appOptions.Parse()
 
 	// apply flags
-	t, _ := maps.String(&flags, "", "template")
+	t, _ := maps.String(flags, "", "template")
 	if tmpl, err := template.ParseFiles(t); err != nil {
 		staticmd.Logger.Error("Failed to open template: %s", err)
 		os.Exit(1)
 	} else {
 		staticmd.Template = *tmpl
 	}
-	staticmd.Input, _ = maps.String(&flags, staticmd.Input, "input")
-	staticmd.Output, _ = maps.String(&flags, staticmd.Output, "output")
-	staticmd.Book, _ = maps.Bool(&flags, staticmd.Book, "book")
-	staticmd.Relative, _ = maps.Bool(&flags, staticmd.Relative, "relative")
+	staticmd.Input, _ = maps.String(flags, staticmd.Input, "input")
+	staticmd.Output, _ = maps.String(flags, staticmd.Output, "output")
+	staticmd.Book, _ = maps.Bool(flags, staticmd.Book, "book")
+	staticmd.Relative, _ = maps.Bool(flags, staticmd.Relative, "relative")
 
 	// sanitize input & output
 	staticmd.Input, _ = filepath.Abs(staticmd.Input)
 	staticmd.Output, _ = filepath.Abs(staticmd.Output)
 
 	// optionally enable debugging
-	if debug, _ := maps.Bool(&flags, false, "debug"); debug {
+	if debug, _ := maps.Bool(flags, false, "debug"); debug {
 		staticmd.Logger.Severity = log.Debug
 	}
 
 	// optionally enable profiling
-	if profile, _ := maps.String(&flags, "", "profile"); profile != "" {
+	if profile, _ := maps.String(flags, "", "profile"); profile != "" {
 		f, _ := os.Create(profile)
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
