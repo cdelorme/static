@@ -3,9 +3,10 @@ package main
 import (
 	"html/template"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime/pprof"
+
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -13,22 +14,9 @@ import (
 	"github.com/cdelorme/go-log"
 	"github.com/cdelorme/go-maps"
 	"github.com/cdelorme/go-option"
-)
 
-// check that a path exists
-// does not care if it is a directory
-// will not say whether user has rw access, but
-// will throw an error if the user cannot read the parent directory
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
+	"github.com/cdelorme/staticmd"
+)
 
 // if within a git repo, gets git version as a short-hash
 // otherwise falls back to a unix timestamp
@@ -41,18 +29,13 @@ func version() string {
 	return version
 }
 
-// remove the path and extension from a given filename
-func basename(name string) string {
-	return filepath.Base(strings.TrimSuffix(name, filepath.Ext(name)))
-}
-
 func main() {
 
 	// get current directory
 	cwd, _ := os.Getwd()
 
 	// prepare staticmd with dependencies & defaults
-	staticmd := Staticmd{
+	gen := staticmd.Staticmd{
 		Logger:  log.Logger{},
 		Version: version(),
 		Input:   cwd,
@@ -74,19 +57,19 @@ func main() {
 	// apply flags
 	t, _ := maps.String(flags, "", "template")
 	if tmpl, err := template.ParseFiles(t); err != nil {
-		staticmd.Logger.Error("Failed to open template: %s", err)
+		gen.Logger.Error("Failed to open template: %s", err)
 		os.Exit(1)
 	} else {
-		staticmd.Template = *tmpl
+		gen.Template = *tmpl
 	}
-	staticmd.Input, _ = maps.String(flags, staticmd.Input, "input")
-	staticmd.Output, _ = maps.String(flags, staticmd.Output, "output")
-	staticmd.Book, _ = maps.Bool(flags, staticmd.Book, "book")
-	staticmd.Relative, _ = maps.Bool(flags, staticmd.Relative, "relative")
+	gen.Input, _ = maps.String(flags, gen.Input, "input")
+	gen.Output, _ = maps.String(flags, gen.Output, "output")
+	gen.Book, _ = maps.Bool(flags, gen.Book, "book")
+	gen.Relative, _ = maps.Bool(flags, gen.Relative, "relative")
 
 	// sanitize input & output
-	staticmd.Input, _ = filepath.Abs(staticmd.Input)
-	staticmd.Output, _ = filepath.Abs(staticmd.Output)
+	gen.Input, _ = filepath.Abs(gen.Input)
+	gen.Output, _ = filepath.Abs(gen.Output)
 
 	// optionally enable profiling
 	if profile, _ := maps.String(flags, "", "profile"); profile != "" {
@@ -96,22 +79,22 @@ func main() {
 	}
 
 	// sanitize & validate properties
-	staticmd.Input = filepath.Clean(staticmd.Input)
-	staticmd.Output = filepath.Clean(staticmd.Output)
+	gen.Input = filepath.Clean(gen.Input)
+	gen.Output = filepath.Clean(gen.Output)
 
 	// print debug status
-	staticmd.Logger.Debug("Staticmd State: %+v", staticmd)
+	gen.Logger.Debug("Staticmd State: %+v", gen)
 
 	// walk the file system
-	if err := filepath.Walk(staticmd.Input, staticmd.Walk); err != nil {
-		staticmd.Logger.Error("failed to walk directory: %s", err)
+	if err := filepath.Walk(gen.Input, gen.Walk); err != nil {
+		gen.Logger.Error("failed to walk directory: %s", err)
 	}
-	staticmd.Logger.Debug("Pages: %+v", staticmd.Pages)
+	gen.Logger.Debug("Pages: %+v", gen.Pages)
 
 	// build
-	if staticmd.Book {
-		staticmd.Single()
+	if gen.Book {
+		gen.Single()
 	} else {
-		staticmd.Multi()
+		gen.Multi()
 	}
 }

@@ -1,4 +1,4 @@
-package main
+package staticmd
 
 import (
 	"html/template"
