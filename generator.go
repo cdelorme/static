@@ -301,7 +301,7 @@ func (self *Generator) Generate() error {
 	}
 
 	// acquire version
-	self.version = version()
+	self.version = version(self.Input)
 
 	// sanitize input & output
 	self.Input, _ = filepath.Abs(self.Input)
