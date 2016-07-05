@@ -87,3 +87,19 @@ func TestBasename(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestIsMarkdown(t *testing.T) {
+	t.Parallel()
+
+	// test matching types
+	for i := range extensions {
+		if !isMarkdown("file." + extensions[i]) {
+			t.FailNow()
+		}
+	}
+
+	// test non matching type
+	if isMarkdown("nope") {
+		t.FailNow()
+	}
+}

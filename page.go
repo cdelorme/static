@@ -2,10 +2,10 @@ package staticmd
 
 import "html/template"
 
-type Page struct {
+type page struct {
 	Name    string
 	Version string
-	Nav     []Navigation
+	Nav     []navigation
 	Depth   string
 	Content template.HTML
 }

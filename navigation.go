@@ -1,6 +1,6 @@
 package staticmd
 
-type Navigation struct {
-	Link string
-	Name string
+type navigation struct {
+	Link  string
+	Title string
 }

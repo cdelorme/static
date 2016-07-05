@@ -20,17 +20,18 @@ type logger interface {
 	Info(string, ...interface{})
 }
 
-var stat = os.Stat
-var isNotExist = os.IsNotExist
-
 type runner interface {
 	Run(string, ...string) ([]byte, error)
 }
 
+var stat = os.Stat
+var isNotExist = os.IsNotExist
+var extensions = []string{".md", ".mkd", ".markdown"}
 var runnable runner
 
 type cmd struct{}
 
+// a command runner to abstract exec
 func (self cmd) Run(command string, args ...string) ([]byte, error) {
 	return exec.Command(command, args...).Output()
 }
@@ -64,4 +65,14 @@ func version(dir string) string {
 // remove the path and extension from a given filename
 func basename(name string) string {
 	return filepath.Base(strings.TrimSuffix(name, filepath.Ext(name)))
+}
+
+// check for markdown in supported extensions array
+func isMarkdown(path string) bool {
+	for i := range extensions {
+		if strings.HasSuffix(path, extensions[i]) {
+			return true
+		}
+	}
+	return false
 }
