@@ -9,22 +9,15 @@ import (
 	"time"
 )
 
-var mockReadfileBytes []byte
-var mockReadfileError error
-var mockTemplateError error
-var mockCreateFile *os.File
-var mockCreateError error
-var mockMkdirError error
-var mockParseTemplate *template.Template
-var mockParseError error
-var mockWalkError error
+var parseTemplate *template.Template
+var readfileError, templateError, createError, mkdirallError, parseError, walkError error
 
 func init() {
-	readfile = func(_ string) ([]byte, error) { return mockReadfileBytes, mockReadfileError }
-	create = func(_ string) (*os.File, error) { return mockCreateFile, mockCreateError }
-	mkdirall = func(_ string, _ os.FileMode) error { return mockMkdirError }
-	parseFiles = func(...string) (*template.Template, error) { return mockParseTemplate, mockParseError }
-	walk = func(_ string, _ filepath.WalkFunc) error { return mockWalkError }
+	readfile = func(_ string) ([]byte, error) { return nil, readfileError }
+	create = func(_ string) (*os.File, error) { return nil, createError }
+	mkdirall = func(_ string, _ os.FileMode) error { return mkdirallError }
+	parseFiles = func(...string) (*template.Template, error) { return parseTemplate, parseError }
+	walk = func(_ string, _ filepath.WalkFunc) error { return walkError }
 }
 
 type mockLogger struct{}
@@ -35,7 +28,7 @@ func (self *mockLogger) Info(_ string, _ ...interface{})  {}
 
 type mockTemplate struct{}
 
-func (self *mockTemplate) Execute(_ io.Writer, _ interface{}) error { return mockTemplateError }
+func (self *mockTemplate) Execute(_ io.Writer, _ interface{}) error { return templateError }
 
 type mockFileInfo struct {
 	N  string
@@ -96,13 +89,9 @@ func TestWalk(t *testing.T) {
 func TestMulti(t *testing.T) {
 	g := Generator{Logger: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
 
-	// reset defaults for parameters
-	mockCreateError = nil
-	mockReadfileError = nil
-	mockMkdirError = nil
-	statError = nil
+	// set expected defaults
 	notExist = false
-	mockCreateFile = &os.File{}
+	statError = nil
 
 	// no pages
 	if e := g.multi(); e != nil {
@@ -120,76 +109,77 @@ func TestMulti(t *testing.T) {
 		t.FailNow()
 	}
 
+	// test failing execute
+	templateError = mockError
+	if e := g.multi(); e == nil {
+		t.FailNow()
+	}
+
 	// test failing file creation
-	mockCreateError = mockError
+	createError = mockError
 	if e := g.multi(); e == nil {
 		t.FailNow()
 	}
 
 	// test failing to read the file
-	mockReadfileError = mockError
+	readfileError = mockError
 	if e := g.multi(); e == nil {
 		t.FailNow()
 	}
 
 	// test dir creation failure
-	mockMkdirError = mockError
+	mkdirallError = mockError
 	statError = mockError
-	notExist = true
 	if e := g.multi(); e == nil {
 		t.FailNow()
 	}
 }
 
 func TestSingle(t *testing.T) {
-	t.Parallel()
 	g := Generator{Logger: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
 
-	// reset defaults for parameters
-	mockCreateError = nil
-	mockReadfileError = nil
-	mockMkdirError = nil
+	// reset expected defaults
 	statError = nil
-	notExist = false
-	mockCreateFile = &os.File{}
+	readfileError = nil
+	createError = nil
+	templateError = nil
 
 	// test full pass
 	if e := g.single(); e != nil {
 		t.FailNow()
 	}
 
+	// test failing execute
+	templateError = mockError
+	if e := g.single(); e == nil {
+		t.FailNow()
+	}
+
 	// test create error
-	mockCreateError = mockError
+	createError = mockError
 	if e := g.single(); e == nil {
 		t.FailNow()
 	}
 
 	// test fail mkdirall
-	mockMkdirError = mockError
+	mkdirallError = mockError
 	statError = mockError
 	if e := g.single(); e == nil {
 		t.FailNow()
 	}
 
 	// test fail readfile
-	mockReadfileError = mockError
+	readfileError = mockError
 	if e := g.single(); e == nil {
 		t.FailNow()
 	}
 }
 
 func TestGenerate(t *testing.T) {
-	t.Parallel()
 	g := Generator{Logger: &mockLogger{}}
 
-	// reset defaults for parameters
-	mockParseTemplate = template.New("test")
-	mockCreateError = nil
-	mockReadfileError = nil
-	mockMkdirError = nil
-	statError = nil
-	notExist = false
-	mockTemplateError = nil
+	// set template for stand-alone execution
+	parseTemplate = template.New("test")
 
 	// test full pass
 	if e := g.Generate(); e != nil {
@@ -203,13 +193,13 @@ func TestGenerate(t *testing.T) {
 	}
 
 	// test walk error
-	mockWalkError = mockError
+	walkError = mockError
 	if e := g.Generate(); e == nil {
 		t.FailNow()
 	}
 
 	// test template error
-	mockParseError = mockError
+	parseError = mockError
 	if e := g.Generate(); e == nil {
 		t.FailNow()
 	}

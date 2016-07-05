@@ -36,7 +36,10 @@ func TestCmd(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
-	t.Parallel()
+
+	// set expected defaults
+	notExist = false
+	statError = nil
 
 	// test stat success exists fail
 	if _, e := exists(""); e != nil {
