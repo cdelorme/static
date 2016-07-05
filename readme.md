@@ -1,105 +1,64 @@
 
 # staticmd
 
-This is a golang project for a command that generates static html output from markdown documents and a template.  It's purpose is to make it easy to convert large folders in bulk, as well as single-page support.  It works for simple static content websites, as well as documentation.
+This is a go library written to provide static generation of html from markdown with a template.
+
+The intended function is to make it easy to convert large folders of documentation in bulk to explorable web content or a single-page document for printing as a PDF and redistributing.
+
+_This project was used as a means of self-education for learning the go programming language and tooling._
 
 
-## alternatives
+## design
 
-Other tools exist, not limited to the golang language:
+The design focuses on three key outcomes:
 
-- [node; harp.js](http://harpjs.com/).
-- [golang; hugo](http://gohugo.io/)
-
-_My project was for educational purposes, and to provide a much more basic utility than the above options._
-
-
-## sales pitch
-
-The aim of this tool is to provide a simple command with sensible flags that will generate:
-
-- a full website
-- a relative-pathed local readme
-- a single file with a table of contents
+- absolute paths for a website
+- relative paths for local content
+- single-file with a table of contents
 
 It depends on:
 
-- a user-supplied template
-- a bunch of markdown files
+- markdown
+- a template
 
-It supplies the template with convenient output, such as:
+_An [example template](cmd/staticmd/template.tmpl) has been provided._
 
-- top level navigation
-- asset versioning
+It automates two convenience outputs:
 
-Its options include:
-
-- template path
-- input path
-- output path
-- single-page output
-- relative links
-- cpu profiling
+- automatically generated index navigation
+- asset versions for cache busting
 
 
-**Behavior:**
+### template
 
-The template path is the only required parameter, and an example will be included with the project source.
+A user-defined template affords you flexibility and control.
 
-It assumes the input path is the execution directory.
-
-It assumes an output path of `public/` relative to the execution path.
-
-Single page output will combine all files in the input path into a single output; something akin to a "book".  When this flag is selected the full table of contents is listed first; depth is applied based on the folder layout, and in the order which it was parsed.
-
-By default the application will assume absolute paths starting at the `output` directory.  If you use the `relative` flag it will use relative-path file names and rely on a depth parameter in the template.
-
-If run within a repository it will attempt to grab the short-hash from git as a version, otherwise it will use a unix timestamp.
-
-It assumes the index will match `index.html`.  If no match is found no table of contents are created, and no references to that folders contents will be created, even if it contains markdown files.
-
-For multiple page generation it utilizies concurrency.  _When run in single-page mode it cannot build concurrently._
-
-
-**It does not come with:**
-
-- abstractions
-- interfaces
-- unit tests
-
-
-## usage
-
-Install the command:
-
-    go get github.com/cdelorme/staticmd
-
-In this example we can generate a single-page document for easier printing and sharing:
-
-    staticmd -t template.tmpl -s -c src/
-
-**The above command will generate a single file from the template using files inside `src/`.**
-
-_For further details on command line operation, use the `--help` flag._
-
-
-### template file
-
-A single template file can be used to generate all pages; even single-page output.
-
-The following variables are provided to the template file:
+A limited subset of variables are provided for your use:
 
 - Depth
 - Version
 - Nav
 - Content
 
-The `.Depth` property is for links you supply, such as to css and js assets.
+The `.Depth` property is used when generating paths to global resources such as javascript, style sheets, and images.
 
-The `.Version` tag allows you to prevent caching of changed assets, such as css and js, but can also be supplied.
+The `.Version` property allows you to address cached resources such as javascript, style sheets, and resources javascript may ask for.  _It is highly efficient as the cache will immediately rebuild using the new version._
 
-The `.Nav` is a set of top-level links only.  In single-page mode the navigation is omitted.
+The `.Nav` is the table-of-contents produced in single-page or "book" mode, and is empty otherwise.
 
-The `.Content` is the file contents converted to html.  Any `index.html` files deeper than the output folder will automatically have a table of contents prepended to them.
+The `.Content` is the file contents converted to html, and will have a table of contents automatically prepended to any `index.html` file deeper than the root of the output folder.
 
-_Any binary assets such as images should be hosted on a CDN and have full paths.  If you need to supply a full offline version then use the single-page mode with this tool and print to pdf._
+_Any assets hosted on a CDN can be given full paths, and it is recommended to host binary resources (such as images) and any javascript and style sheets there as well._
+
+
+## usage
+
+To import the library:
+
+	import "github.com/cdelorme/staticmd"
+
+To install the cli utility:
+
+	go get -u github.com/cdelorme/staticmd/...
+
+_The ellipses will install all packages below the main path._
