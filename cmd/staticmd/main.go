@@ -11,10 +11,21 @@ import (
 	"github.com/cdelorme/staticmd"
 )
 
-func configure() *staticmd.Generator {
+var exit = os.Exit
+var getwd = os.Getwd
+
+type generator interface {
+	Generate() error
+}
+
+type logger interface {
+	Error(string, ...interface{})
+}
+
+func configure() (generator, logger) {
 
 	// get current directory
-	cwd, _ := os.Getwd()
+	cwd, _ := getwd()
 
 	// prepare staticmd with dependencies & defaults
 	smd := &staticmd.Generator{
@@ -41,13 +52,13 @@ func configure() *staticmd.Generator {
 	smd.Book, _ = maps.Bool(flags, smd.Book, "book")
 	smd.Relative, _ = maps.Bool(flags, smd.Relative, "relative")
 
-	return smd
+	return smd, smd.Logger
 }
 
 func main() {
-	smd := configure()
+	smd, l := configure()
 	if err := smd.Generate(); err != nil {
-		smd.Logger.Error("%s", err)
-		os.Exit(1)
+		l.Error("generator failed (%s)", err)
+		exit(1)
 	}
 }
