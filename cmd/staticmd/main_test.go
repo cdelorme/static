@@ -18,10 +18,6 @@ type mockGenerator struct{}
 
 func (self *mockGenerator) Generate() error { return mockError }
 
-type mockLogger struct{}
-
-func (self *mockLogger) Error(_ string, _ ...interface{}) {}
-
 func TestPlacebo(_ *testing.T) {}
 
 func TestMain(_ *testing.T) {
@@ -35,8 +31,8 @@ func TestConfigure(t *testing.T) {
 	os.Args = []string{"-t", "afile", "-i", "/in/", "-o", "/out/", "-b", "-r"}
 
 	// run configure & check results
-	s, l := configure()
-	if s == nil || l == nil {
+	s := configure()
+	if s == nil {
 		t.FailNow()
 	}
 

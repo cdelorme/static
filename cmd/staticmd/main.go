@@ -18,23 +18,15 @@ type generator interface {
 	Generate() error
 }
 
-type logger interface {
-	Error(string, ...interface{})
-}
-
-func configure() (generator, logger) {
-
-	// get current directory
+func configure() generator {
 	cwd, _ := getwd()
 
-	// prepare staticmd with dependencies & defaults
 	smd := &staticmd.Generator{
 		Logger: &log.Logger{},
 		Input:  cwd,
 		Output: filepath.Join(cwd, "public/"),
 	}
 
-	// prepare cli options
 	appOptions := option.App{Description: "command line tool for generating deliverable static content"}
 	appOptions.Flag("template", "path to the template file", "--template", "-t")
 	appOptions.Flag("input", "path to the markdown files", "--input", "-i")
@@ -45,20 +37,18 @@ func configure() (generator, logger) {
 	appOptions.Example("-t template.tmpl -i src/ -o out/ -r")
 	flags := appOptions.Parse()
 
-	// apply flags
 	smd.TemplateFile, _ = maps.String(flags, smd.TemplateFile, "template")
 	smd.Input, _ = maps.String(flags, smd.Input, "input")
 	smd.Output, _ = maps.String(flags, smd.Output, "output")
 	smd.Book, _ = maps.Bool(flags, smd.Book, "book")
 	smd.Relative, _ = maps.Bool(flags, smd.Relative, "relative")
 
-	return smd, smd.Logger
+	return smd
 }
 
 func main() {
-	smd, l := configure()
+	smd := configure()
 	if err := smd.Generate(); err != nil {
-		l.Error("generator failed (%s)", err)
 		exit(1)
 	}
 }
