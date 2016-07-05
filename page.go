@@ -1,8 +1,6 @@
 package staticmd
 
-import (
-	"html/template"
-)
+import "html/template"
 
 type Page struct {
 	Name    string
