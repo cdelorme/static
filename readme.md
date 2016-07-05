@@ -62,3 +62,19 @@ To install the cli utility:
 	go get -u github.com/cdelorme/staticmd/...
 
 _The ellipses will install all packages below the main path._
+
+
+## future
+
+In the future I would like to address the following:
+
+- make page content generation a repeatable modular function
+	- _perhaps offload to page struct_
+- make navigation a repeatable modular function
+- standardize navigation in a flexible way
+	- using `.Nav` in the template per page instead of index-only with hard-coded structure
+		- _major issue is how to support depth with one template definition_
+	- supporting `back-to-top` functionality should not be hard-coded into the generator either
+- streamline how relative vs absolute paths are handled
+- repeatable directory creation behavior
+- simplified reusable modular mkdirall logic
