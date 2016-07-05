@@ -39,7 +39,6 @@ Its options include:
 - output path
 - single-page output
 - relative links
-- debug mode
 - cpu profiling
 
 

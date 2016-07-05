@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"runtime/pprof"
 	"strconv"
 	"strings"
@@ -54,16 +53,11 @@ func main() {
 
 	// prepare staticmd with dependencies & defaults
 	staticmd := Staticmd{
-		Logger:  log.Logger{Severity: log.Error},
+		Logger:  log.Logger{},
 		Version: version(),
 		Input:   cwd,
 		Output:  filepath.Join(cwd, "public/"),
 	}
-	staticmd.Logger.Color()
-
-	// optimize concurrent processing
-	staticmd.MaxParallelism = runtime.NumCPU()
-	runtime.GOMAXPROCS(staticmd.MaxParallelism)
 
 	// prepare cli options
 	appOptions := option.App{Description: "command line tool for generating deliverable static content"}
@@ -72,7 +66,6 @@ func main() {
 	appOptions.Flag("output", "path to place generated content", "--output", "-o")
 	appOptions.Flag("book", "combine all content into a single file", "--book", "-b")
 	appOptions.Flag("relative", "use relative paths instead of absolute paths", "--relative", "-r")
-	appOptions.Flag("debug", "verbose debug output", "--debug", "-d")
 	appOptions.Flag("profile", "produce profile output to supplied path", "--profile", "-p")
 	appOptions.Example("-t template.tmpl -i . -b")
 	appOptions.Example("-t template.tmpl -i src/ -o out/ -r")
@@ -94,11 +87,6 @@ func main() {
 	// sanitize input & output
 	staticmd.Input, _ = filepath.Abs(staticmd.Input)
 	staticmd.Output, _ = filepath.Abs(staticmd.Output)
-
-	// optionally enable debugging
-	if debug, _ := maps.Bool(flags, false, "debug"); debug {
-		staticmd.Logger.Severity = log.Debug
-	}
 
 	// optionally enable profiling
 	if profile, _ := maps.String(flags, "", "profile"); profile != "" {
