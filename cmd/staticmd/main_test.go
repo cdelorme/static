@@ -43,7 +43,7 @@ func TestConfigure(t *testing.T) {
 	}
 
 	// check values on generator match cli parameters
-	if g.Input != "/in/" || g.Output != "/out/" || !g.Book || g.TemplateFile != "afile" {
+	if g.Input != "/in/" || g.Output != "/out/" || !g.Relative || !g.Book || g.TemplateFile != "afile" {
 		t.FailNow()
 	}
 }

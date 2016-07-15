@@ -37,11 +37,7 @@ func configure() generator {
 	appOptions.Example("-t template.tmpl -i src/ -o out/ -r")
 	flags := appOptions.Parse()
 
-	smd.TemplateFile, _ = maps.String(flags, smd.TemplateFile, "template")
-	smd.Input, _ = maps.String(flags, smd.Input, "input")
-	smd.Output, _ = maps.String(flags, smd.Output, "output")
-	smd.Book, _ = maps.Bool(flags, smd.Book, "book")
-	smd.Relative, _ = maps.Bool(flags, smd.Relative, "relative")
+	maps.To(smd, flags)
 
 	return smd
 }

@@ -23,12 +23,13 @@ type ht interface {
 }
 
 type Generator struct {
-	Input        string
-	Output       string
-	TemplateFile string
-	Book         bool
-	Relative     bool
-	Logger       logger
+	Book         bool   `json:"book,omitempty"`
+	Input        string `json:"input,omitempty"`
+	Output       string `json:"output,omitempty"`
+	Relative     bool   `json:"relative,omitempty"`
+	TemplateFile string `json:"template,omitempty"`
+
+	Logger logger
 
 	version  string
 	pages    []string
@@ -55,9 +56,9 @@ func (self *Generator) walk(path string, file os.FileInfo, err error) error {
 	return err
 }
 
-func (self *Generator) multi() (err error) {
+func (self *Generator) multi() error {
 	navi := make(map[string][]navigation)
-	var terr error
+	var err error
 
 	for i, _ := range self.pages {
 		out := self.ior(self.pages[i])
@@ -84,9 +85,8 @@ func (self *Generator) multi() (err error) {
 		if _, ok := navi[dir]; !ok {
 			navi[dir] = make([]navigation, 0)
 			if ok, _ := exists(dir); !ok {
-				if e := mkdirall(dir, 0770); e != nil {
-					self.Logger.Error("failed to create path: %s, %s", dir, e)
-					terr = e
+				if err = mkdirall(dir, 0770); err != nil {
+					self.Logger.Error("failed to create path: %s, %s", dir, err)
 				}
 			}
 		}
@@ -98,7 +98,7 @@ func (self *Generator) multi() (err error) {
 		var markdown []byte
 		if markdown, err = readfile(p); err != nil {
 			self.Logger.Error("failed to read file: %s, %s", p, err)
-			return
+			return err
 		}
 
 		out := self.ior(p)
@@ -136,18 +136,14 @@ func (self *Generator) multi() (err error) {
 		}
 	}
 
-	if err == nil {
-		err = terr
-	}
-
-	return
+	return err
 }
 
-func (self *Generator) single() (err error) {
+func (self *Generator) single() error {
 	content := make([]byte, 0)
 	toc := "\n"
 	previous_depth := 0
-	var terr error
+	var err error
 
 	for _, p := range self.pages {
 		shorthand := strings.TrimPrefix(p, self.Input+string(os.PathSeparator))
@@ -158,10 +154,9 @@ func (self *Generator) single() (err error) {
 		anchor := strings.Replace(shorthand, string(os.PathSeparator), "-", -1)
 		toc = toc + strings.Repeat("\t", depth) + "- [" + basename(p) + "](#" + anchor + ")\n"
 
-		markdown, e := readfile(p)
-		if e != nil {
-			self.Logger.Error("failed to read file: %s (%s)", p, e)
-			terr = e
+		var markdown []byte
+		if markdown, err = readfile(p); err != nil {
+			self.Logger.Error("failed to read file: %s (%s)", p, err)
 			continue
 		}
 
@@ -200,11 +195,7 @@ func (self *Generator) single() (err error) {
 		self.Logger.Error("%s\n", err)
 	}
 
-	if err == nil {
-		err = terr
-	}
-
-	return
+	return err
 }
 
 func (self *Generator) Generate() error {
