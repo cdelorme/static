@@ -16,7 +16,7 @@ There are other tools in multiple languages that already provide full-featured s
 
 ## sales pitch
 
-While the original point of this project was self-education, it still serves as a simple and compact shippable utility at only `735` lines of code (including tests and comments).  With recent updates it is now much cleaner and fully tested.
+While the original point of this project was self-education, it still serves as a simple and compact shippable utility at only `722` lines of code (including tests and comments).  With recent updates it is now much cleaner and fully tested.
 
 It has a minimal dependency footprint:
 
