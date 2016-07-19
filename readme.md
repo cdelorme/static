@@ -68,13 +68,25 @@ _The ellipses will install all packages below the main path._
 
 In the future I would like to address the following:
 
-- make page content generation a repeatable modular function
-	- _perhaps offload to page struct_
-- make navigation a repeatable modular function
-- standardize navigation in a flexible way
-	- using `.Nav` in the template per page instead of index-only with hard-coded structure
-		- _major issue is how to support depth with one template definition_
-	- supporting `back-to-top` functionality should not be hard-coded into the generator either
-- streamline how relative vs absolute paths are handled
-- repeatable directory creation behavior
-- simplified reusable modular mkdirall logic
+- move page generation into a separate function
+	- consider offloading logic into `page` struct to cleanly separate code
+	- separation grants support concurrent execution of multi-page
+- move create-dir-if-not-exists logic into a separate function and call that from page generation
+- remove `back-to-top` from code
+	- _the `back-to-top` feature can be generated on-load via javascript_
+- streamline logic surrounding how absolute and relative paths are handled
+- standardize optimal navigation logic
+	- fix title acquisition to check for `title: ` or first header
+	- each nav struct can have an embedded []nav
+		- function exposed for template access to render recursively
+	- _every page should use the same navigation output in the same way_
+- switch to bytes.Buffer and buffered write for creating output file(s)
+- embed default template using the go-bindata utility with a fallback for a supplied template
+- add simple queue with rwmutex to safely process multi-file pages concurrently
+
+
+# references
+
+- [blackfriday](https://godoc.org/github.com/russross/blackfriday)
+- [function call from template](http://stackoverflow.com/questions/10200178/call-a-method-from-a-go-template)
+- [buffer blackfriday output](http://grokbase.com/t/gg/golang-nuts/142spmv4fe/go-nuts-differences-between-os-io-ioutils-bufio-bytes-with-buffer-type-packages-for-file-reading)
