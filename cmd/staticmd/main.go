@@ -26,9 +26,9 @@ func configure() generator {
 	}
 
 	g := &gonf.Gonf{Description: "command line tool for generating deliverable static content", Configuration: smd}
-	g.Add("template", "path to the template file", "STATICMD_TEMPLATE", "--template", "-t")
-	g.Add("input", "path to the markdown files", "STATICMD_INPUT", "--input", "-i")
-	g.Add("output", "path to place generated content", "STATICMD_OUTPUT", "--output", "-o")
+	g.Add("template", "path to the template file", "STATICMD_TEMPLATE", "--template", "-t:")
+	g.Add("input", "path to the markdown files", "STATICMD_INPUT", "--input", "-i:")
+	g.Add("output", "path to place generated content", "STATICMD_OUTPUT", "--output", "-o:")
 	g.Add("book", "combine all content into a single file", "STATICMD_BOOK", "--book", "-b")
 	g.Add("relative", "use relative paths instead of absolute paths", "STATICMD_RELATIVE", "--relative", "-r")
 	g.Example("-t template.tmpl -i . -b")
