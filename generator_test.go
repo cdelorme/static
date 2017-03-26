@@ -87,7 +87,7 @@ func TestWalk(t *testing.T) {
 }
 
 func TestMulti(t *testing.T) {
-	g := Generator{Logger: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
+	g := Generator{L: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
 
 	// set expected defaults
 	notExist = false
@@ -136,7 +136,7 @@ func TestMulti(t *testing.T) {
 }
 
 func TestSingle(t *testing.T) {
-	g := Generator{Logger: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
+	g := Generator{L: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
 
 	// reset expected defaults
 	statError = nil
@@ -176,7 +176,7 @@ func TestSingle(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	g := Generator{Logger: &mockLogger{}}
+	g := Generator{L: &mockLogger{}}
 
 	// set template for stand-alone execution
 	parseTemplate = template.New("test")

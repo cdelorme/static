@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cdelorme/go-log"
+	"github.com/cdelorme/glog"
 	"github.com/cdelorme/gonf"
 	"github.com/cdelorme/staticmd"
 )
@@ -20,12 +20,12 @@ func configure() generator {
 	cwd, _ := getwd()
 
 	smd := &staticmd.Generator{
-		Logger: &log.Logger{},
+		L:      &glog.Logger{},
 		Input:  cwd,
 		Output: filepath.Join(cwd, "public/"),
 	}
 
-	g := &gonf.Gonf{Description: "command line tool for generating deliverable static content", Configuration: smd}
+	g := &gonf.Config{Description: "command line tool for generating deliverable static content", Target: smd}
 	g.Add("template", "path to the template file", "STATICMD_TEMPLATE", "--template", "-t:")
 	g.Add("input", "path to the markdown files", "STATICMD_INPUT", "--input", "-i:")
 	g.Add("output", "path to place generated content", "STATICMD_OUTPUT", "--output", "-o:")
