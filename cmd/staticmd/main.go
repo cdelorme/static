@@ -25,7 +25,9 @@ func configure() generator {
 		Output: filepath.Join(cwd, "public/"),
 	}
 
-	g := &gonf.Config{Description: "command line tool for generating deliverable static content", Target: smd}
+	g := &gonf.Config{}
+	g.Target(smd)
+	g.Description("command line tool for generating deliverable static content")
 	g.Add("template", "path to the template file", "STATICMD_TEMPLATE", "--template", "-t:")
 	g.Add("input", "path to the markdown files", "STATICMD_INPUT", "--input", "-i:")
 	g.Add("output", "path to place generated content", "STATICMD_OUTPUT", "--output", "-o:")
