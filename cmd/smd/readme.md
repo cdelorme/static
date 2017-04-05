@@ -1,34 +1,22 @@
 
-# staticmd
+# smd
 
-This is the cli implementation and interface to the [staticmd](https://github.com/cdelorme/staticmd) library.
-
-It exposes the libraries functionality and handles inputs and outputs through command line.
+This is the cli implementation and interface to the [static](https://github.com/cdelorme/static) library for generating html from markdown.
 
 
 ## alternatives
 
-There are other tools in multiple languages that already provide full-featured static generated assets with support for far more complex use cases:
+There are far better tools written in a variety of languages which offer more features and better support.  _However they may also impose a runtime, special configuration, or special syntax_:
 
 - [node; harp.js](http://harpjs.com/).
 - [golang; hugo](http://gohugo.io/)
 
-
-## sales pitch
-
-While the original point of this project was self-education, it still serves as a simple and compact shippable utility at only `722` lines of code (including tests and comments).  With recent updates it is now much cleaner and fully tested.
-
-It has a minimal dependency footprint:
-
-- [blackfriday](https://github.com/russross/blackfriday)
-- [go-log](https://github.com/cdelorme/go-log)
-- [go-maps](https://github.com/cdelorme/go-maps)
-- [go-option](https://github.com/cdelorme/go-option)
+So, while the purpose of this project was self-education, what it provides is a very compact tool with minimal third party dependencies and no special requirements for configuration or syntax, wrapped in under 700 lines of code (including tests and comments).
 
 
 ## design
 
-This project assumes some defaults behaviors:
+This project assumes the following behaviors:
 
 - it tries all files even if it fails to read one or more of them, but it will produce a valid exit code
 - it assumes the current working directory (eg. where it is run from) is the input path
@@ -57,7 +45,7 @@ The utility has builtin help to assist with using it:
 
 	staticmd help
 
-_It uses the [`go-log` package](https://github.com/cdelorme/go-log), which means you can enable logging by setting `LOG_LEVEL=debug` (or any other valid log level)._
+_Logging is completely controlled by the `LOG_LEVEL` environment variable, which accepts standard syslog severities with a default of `error` (use `silent` to turn off output)._
 
 You can use it to generate a single-page document that can be printed as a PDF and distributed with ease:
 
