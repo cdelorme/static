@@ -11,6 +11,7 @@ import (
 
 var parseTemplate *template.Template
 var readfileError, templateError, createError, mkdirallError, parseError, walkError error
+var mockOperation = func(b []byte) []byte { return b }
 
 func init() {
 	readfile = func(_ string) ([]byte, error) { return nil, readfileError }
@@ -94,43 +95,43 @@ func TestMulti(t *testing.T) {
 	statError = nil
 
 	// no pages
-	if e := g.multi(); e != nil {
+	if e := g.multi(mockOperation); e != nil {
 		t.FailNow()
 	}
 
 	// test full pass
-	if e := g.multi(); e != nil {
+	if e := g.multi(mockOperation); e != nil {
 		t.FailNow()
 	}
 
 	// test full pass relative
 	g.Relative = true
-	if e := g.multi(); e != nil {
+	if e := g.multi(mockOperation); e != nil {
 		t.FailNow()
 	}
 
 	// test failing execute
 	templateError = mockError
-	if e := g.multi(); e == nil {
+	if e := g.multi(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test failing file creation
 	createError = mockError
-	if e := g.multi(); e == nil {
+	if e := g.multi(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test failing to read the file
 	readfileError = mockError
-	if e := g.multi(); e == nil {
+	if e := g.multi(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test dir creation failure
 	mkdirallError = mockError
 	statError = mockError
-	if e := g.multi(); e == nil {
+	if e := g.multi(mockOperation); e == nil {
 		t.FailNow()
 	}
 }
@@ -145,32 +146,32 @@ func TestSingle(t *testing.T) {
 	templateError = nil
 
 	// test full pass
-	if e := g.single(); e != nil {
+	if e := g.single(mockOperation); e != nil {
 		t.FailNow()
 	}
 
 	// test failing execute
 	templateError = mockError
-	if e := g.single(); e == nil {
+	if e := g.single(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test create error
 	createError = mockError
-	if e := g.single(); e == nil {
+	if e := g.single(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test fail mkdirall
 	mkdirallError = mockError
 	statError = mockError
-	if e := g.single(); e == nil {
+	if e := g.single(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test fail readfile
 	readfileError = mockError
-	if e := g.single(); e == nil {
+	if e := g.single(mockOperation); e == nil {
 		t.FailNow()
 	}
 }
@@ -182,25 +183,25 @@ func TestGenerate(t *testing.T) {
 	parseTemplate = template.New("test")
 
 	// test full pass
-	if e := g.Generate(); e != nil {
+	if e := g.Generate(mockOperation); e != nil {
 		t.FailNow()
 	}
 
 	// test book mode full pass
 	g.Book = true
-	if e := g.Generate(); e == nil {
+	if e := g.Generate(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test walk error
 	walkError = mockError
-	if e := g.Generate(); e == nil {
+	if e := g.Generate(mockOperation); e == nil {
 		t.FailNow()
 	}
 
 	// test template error
 	parseError = mockError
-	if e := g.Generate(); e == nil {
+	if e := g.Generate(mockOperation); e == nil {
 		t.FailNow()
 	}
 }
