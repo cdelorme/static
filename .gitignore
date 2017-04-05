@@ -1,4 +1,4 @@
 .DS_Store
-cmd/staticmd/staticmd
+cmd/smd/smd
 coverage.out
 
