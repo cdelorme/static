@@ -22,7 +22,7 @@ type executor interface {
 
 type operation func([]byte) []byte
 
-type Generator struct {
+type Markdown struct {
 	Book         bool   `json:"book,omitempty"`
 	Input        string `json:"input,omitempty"`
 	Output       string `json:"output,omitempty"`
@@ -36,11 +36,11 @@ type Generator struct {
 	template executor
 }
 
-func (g *Generator) ior(path string) string {
+func (g *Markdown) ior(path string) string {
 	return strings.TrimSuffix(strings.Replace(path, g.Input, g.Output, 1), filepath.Ext(path)) + ".html"
 }
 
-func (g *Generator) depth(path string) string {
+func (g *Markdown) depth(path string) string {
 	if g.Relative {
 		if rel, err := filepath.Rel(filepath.Dir(path), g.Output); err == nil {
 			return rel + string(os.PathSeparator)
@@ -49,14 +49,14 @@ func (g *Generator) depth(path string) string {
 	return ""
 }
 
-func (g *Generator) walk(path string, file os.FileInfo, err error) error {
+func (g *Markdown) walk(path string, file os.FileInfo, err error) error {
 	if file != nil && file.Mode().IsRegular() && file.Size() > 0 && isMarkdown(path) {
 		g.pages = append(g.pages, path)
 	}
 	return err
 }
 
-func (g *Generator) multi(run operation) error {
+func (g *Markdown) multi(run operation) error {
 	navi := make(map[string][]navigation)
 	var err error
 
@@ -139,7 +139,7 @@ func (g *Generator) multi(run operation) error {
 	return err
 }
 
-func (g *Generator) single(run operation) error {
+func (g *Markdown) single(run operation) error {
 	content := make([]byte, 0)
 	toc := "\n"
 	previous_depth := 0
@@ -198,7 +198,7 @@ func (g *Generator) single(run operation) error {
 	return err
 }
 
-func (g *Generator) Generate(run operation) error {
+func (g *Markdown) Generate(run operation) error {
 	var err error
 	if g.template, err = parseFiles(g.TemplateFile); err != nil {
 		g.L.Error("%s\n", err)
@@ -215,7 +215,7 @@ func (g *Generator) Generate(run operation) error {
 		g.L.Error("%s\n", err)
 		return err
 	}
-	g.L.Debug("generator state: %+v", g)
+	g.L.Debug("Markdown state: %+v", g)
 
 	if g.Book {
 		return g.single(run)

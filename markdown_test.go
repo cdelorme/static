@@ -48,7 +48,7 @@ func (self *mockFileInfo) Sys() interface{}   { return self.So }
 
 func TestIor(t *testing.T) {
 	t.Parallel()
-	g := Generator{}
+	g := Markdown{}
 	if s := g.ior("some.md"); len(s) == 0 {
 		t.FailNow()
 	}
@@ -57,7 +57,7 @@ func TestIor(t *testing.T) {
 func TestDepth(t *testing.T) {
 	t.Parallel()
 	absp := "/abs/path/"
-	g := Generator{Output: absp}
+	g := Markdown{Output: absp}
 
 	// test abs depth
 	if d := g.depth("somefile"); len(d) > 0 {
@@ -74,7 +74,7 @@ func TestDepth(t *testing.T) {
 
 func TestWalk(t *testing.T) {
 	t.Parallel()
-	g := Generator{}
+	g := Markdown{}
 
 	p := "valid.md"
 	var f os.FileInfo = &mockFileInfo{S: 1}
@@ -87,7 +87,7 @@ func TestWalk(t *testing.T) {
 }
 
 func TestMulti(t *testing.T) {
-	g := Generator{L: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
+	g := Markdown{L: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
 
 	// set expected defaults
 	notExist = false
@@ -136,7 +136,7 @@ func TestMulti(t *testing.T) {
 }
 
 func TestSingle(t *testing.T) {
-	g := Generator{L: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
+	g := Markdown{L: &mockLogger{}, template: &mockTemplate{}, pages: []string{"fuck.md", "deeper/than/index.md", "deeper/than/data.md"}}
 
 	// reset expected defaults
 	statError = nil
@@ -176,7 +176,7 @@ func TestSingle(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	g := Generator{L: &mockLogger{}}
+	g := Markdown{L: &mockLogger{}}
 
 	// set template for stand-alone execution
 	parseTemplate = template.New("test")
