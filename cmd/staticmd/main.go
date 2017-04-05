@@ -6,17 +6,16 @@ import (
 
 	"github.com/cdelorme/glog"
 	"github.com/cdelorme/gonf"
-	"github.com/cdelorme/staticmd"
+	"github.com/cdelorme/static"
+
+	"github.com/russross/blackfriday"
 )
 
 var exit = os.Exit
 var getwd = os.Getwd
+var operate = blackfriday.MarkdownCommon
 
-type generator interface {
-	Generate() error
-}
-
-func configure() generator {
+func main() {
 	cwd, _ := getwd()
 
 	smd := &staticmd.Generator{
@@ -37,12 +36,7 @@ func configure() generator {
 	g.Example("-t template.tmpl -i src/ -o out/ -r")
 	g.Load()
 
-	return smd
-}
-
-func main() {
-	smd := configure()
-	if err := smd.Generate(); err != nil {
+	if err := smd.Generate(operate); err != nil {
 		exit(1)
 	}
 }

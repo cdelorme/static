@@ -1,11 +1,11 @@
 
-# staticmd
+# [static](https://github.com/cdelorme/static)
 
 This is a go library written to provide static generation of html from markdown with a template.
 
 The intended function is to make it easy to convert large folders of documentation in bulk to explorable web content or a single-page document for printing as a PDF and redistributing.
 
-_This project was used as a means of self-education for learning the go programming language and tooling._
+_The original goal of the project was to learn more about the programming language and tooling._
 
 
 ## design

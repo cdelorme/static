@@ -1,4 +1,4 @@
-package staticmd
+package static
 
 type navigation struct {
 	Link  string

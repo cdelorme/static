@@ -1,4 +1,4 @@
-package staticmd
+package static
 
 import (
 	"bufio"
@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/russross/blackfriday"
 )
 
 var readfile = ioutil.ReadFile
@@ -21,6 +19,8 @@ var walk = filepath.Walk
 type executor interface {
 	Execute(io.Writer, interface{}) error
 }
+
+type operation func([]byte) []byte
 
 type Generator struct {
 	Book         bool   `json:"book,omitempty"`
@@ -56,7 +56,7 @@ func (g *Generator) walk(path string, file os.FileInfo, err error) error {
 	return err
 }
 
-func (g *Generator) multi() error {
+func (g *Generator) multi(run operation) error {
 	navi := make(map[string][]navigation)
 	var err error
 
@@ -119,7 +119,7 @@ func (g *Generator) multi() error {
 			markdown = append([]byte(toc), markdown...)
 		}
 
-		page.Content = template.HTML(blackfriday.MarkdownCommon(markdown))
+		page.Content = template.HTML(run(markdown))
 
 		var f *os.File
 		if f, err = create(out); err != nil {
@@ -139,7 +139,7 @@ func (g *Generator) multi() error {
 	return err
 }
 
-func (g *Generator) single() error {
+func (g *Generator) single(run operation) error {
 	content := make([]byte, 0)
 	toc := "\n"
 	previous_depth := 0
@@ -177,7 +177,7 @@ func (g *Generator) single() error {
 
 	page := page{
 		Version: g.version,
-		Content: template.HTML(blackfriday.MarkdownCommon(content)),
+		Content: template.HTML(run(content)),
 	}
 	out := filepath.Join(g.Output, "index.html")
 
@@ -198,7 +198,7 @@ func (g *Generator) single() error {
 	return err
 }
 
-func (g *Generator) Generate() error {
+func (g *Generator) Generate(run operation) error {
 	var err error
 	if g.template, err = parseFiles(g.TemplateFile); err != nil {
 		g.L.Error("%s\n", err)
@@ -218,7 +218,7 @@ func (g *Generator) Generate() error {
 	g.L.Debug("generator state: %+v", g)
 
 	if g.Book {
-		return g.single()
+		return g.single(run)
 	}
-	return g.multi()
+	return g.multi(run)
 }
