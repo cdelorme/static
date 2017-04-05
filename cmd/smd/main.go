@@ -18,7 +18,7 @@ var operate = blackfriday.MarkdownCommon
 func main() {
 	cwd, _ := getwd()
 
-	smd := &staticmd.Markdown{
+	smd := &static.Markdown{
 		L:      &glog.Logger{},
 		Input:  cwd,
 		Output: filepath.Join(cwd, "public/"),
