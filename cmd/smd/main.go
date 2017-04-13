@@ -26,17 +26,17 @@ func main() {
 
 	g := &gonf.Config{}
 	g.Target(smd)
-	g.Description("command line tool for generating deliverable static content")
-	g.Add("template", "path to the template file", "STATICMD_TEMPLATE", "--template", "-t:")
-	g.Add("input", "path to the markdown files", "STATICMD_INPUT", "--input", "-i:")
-	g.Add("output", "path to place generated content", "STATICMD_OUTPUT", "--output", "-o:")
-	g.Add("book", "combine all content into a single file", "STATICMD_BOOK", "--book", "-b")
-	g.Add("relative", "use relative paths instead of absolute paths", "STATICMD_RELATIVE", "--relative", "-r")
+	g.Description("command line tool for generating static html from markdown")
+	g.Add("web", "parse into individual files matching the original file name", "STATIC_WEB", "--web", "-w")
+	g.Add("template", "path to user-defined template file", "STATIC_TEMPLATE", "--template", "-t:")
+	g.Add("input", "path to the markdown files", "STATIC_INPUT", "--input", "-i:")
+	g.Add("output", "path to place generated content", "STATIC_OUTPUT", "--output", "-o:")
+	g.Add("version", "optional user-defined version", "STATIC_VERSION", "--version", "-v:")
 	g.Example("-t template.tmpl -i . -b")
 	g.Example("-t template.tmpl -i src/ -o out/ -r")
 	g.Load()
 
-	if err := smd.Generate(operate); err != nil {
+	if err := smd.Run(operate); err != nil {
 		exit(1)
 	}
 }

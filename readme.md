@@ -1,88 +1,41 @@
 
+[![GoDoc](https://godoc.org/github.com/cdelorme/static?status.svg)](https://godoc.org/github.com/cdelorme/static)
+
 # [static](https://github.com/cdelorme/static)
 
-This is a go library written to provide static generation of html from markdown with a template.
+An abstraction ontop of [blackfriday](https://godoc.org/github.com/russross/blackfriday) for the purpose of accepting a folder of files and generating html in lexical order with built-in templates.
 
-The intended function is to make it easy to convert large folders of documentation in bulk to explorable web content or a single-page document for printing as a PDF and redistributing.
-
-_The original goal of the project was to learn more about the programming language and tooling._
-
-
-## design
-
-The design focuses on three key outcomes:
-
-- absolute paths for a website
-- relative paths for local content
-- single-file with a table of contents
-
-It depends on:
-
-- markdown
-- a template
-
-_An [example template](cmd/staticmd/template.tmpl) has been provided._
-
-It automates two convenience outputs:
-
-- automatically generated index navigation
-- asset versions for cache busting
-
-
-### template
-
-A user-defined template affords you flexibility and control.
-
-A limited subset of variables are provided for your use:
-
-- Depth
-- Version
-- Nav
-- Content
-
-The `.Depth` property is used when generating paths to global resources such as javascript, style sheets, and images.
-
-The `.Version` property allows you to address cached resources such as javascript, style sheets, and resources javascript may ask for.  _It is highly efficient as the cache will immediately rebuild using the new version._
-
-The `.Nav` is the table-of-contents produced in single-page or "book" mode, and is empty otherwise.
-
-The `.Content` is the file contents converted to html, and will have a table of contents automatically prepended to any `index.html` file deeper than the root of the output folder.
-
-_Any assets hosted on a CDN can be given full paths, and it is recommended to host binary resources (such as images) and any javascript and style sheets there as well._
+_The primary objective of this project was originally self-education._  The result is a sub-par utility with minimal features.  The only benefits it offers are a significantly smaller code base, and no meta-data dependencies.
 
 
 ## usage
 
 To import the library:
 
-	import "github.com/cdelorme/staticmd"
-
-To install the cli utility:
-
-	go get -u github.com/cdelorme/staticmd/...
-
-_The ellipses will install all packages below the main path._
+	import "github.com/cdelorme/static"
 
 
-## future
+## notes
 
-In the future I would like to address the following:
+Relative path support has been removed because raw markdown is intended to be readable.
 
-- move page generation into a separate function
-	- consider offloading logic into `page` struct to cleanly separate code
-	- separation grants support concurrent execution of multi-page
-- move create-dir-if-not-exists logic into a separate function and call that from page generation
-- remove `back-to-top` from code
-	- _the `back-to-top` feature can be generated on-load via javascript_
-- streamline logic surrounding how absolute and relative paths are handled
-- standardize optimal navigation logic
-	- fix title acquisition to check for `title: ` or first header
-	- each nav struct can have an embedded []nav
-		- function exposed for template access to render recursively
-	- _every page should use the same navigation output in the same way_
-- switch to bytes.Buffer and buffered write for creating output file(s)
-- embed default template using the go-bindata utility with a fallback for a supplied template
-- add simple queue with rwmutex to safely process multi-file pages concurrently
+Automatic navigation has been removed from the web solution, since the requirements vary by website and are entirely different when generating a book.  _Use the template override feature to create your own._
+
+The code makes no assumptions about what index name is used, since that is entirely controlled by the web server.
+
+The library is not concurrently safe, because there are zero benefits to running it concurrently.  Everything is bottlenecked at the hard drive, and that cannot be addressed without proper buffered solutions to both markdown and template parsing.
+
+It uses [go-bindata](https://github.com/jteeuwen/go-bindata) to embed default templates, which have been committed to the project since `go generate` is not possible to do from `go get`.
+
+No efforts have been made to optimize re-execution around existing files, _but it would be possible to compare the markdown file modified time against the modified time of existing html files to reduce overhead in the future._
+
+If two files with alternative markdown extensions but identical base names exist, the first match is the only one that will be parsed into an html file.
+
+The book mode provides automatically generated navigation using javascript.
+
+Any absolute links in book mode will not function as desired.
+
+All tests have been (re) written using a black-box approach, where only publicly exposed functions and properties are modified.
 
 
 # references
@@ -90,3 +43,6 @@ In the future I would like to address the following:
 - [blackfriday](https://godoc.org/github.com/russross/blackfriday)
 - [function call from template](http://stackoverflow.com/questions/10200178/call-a-method-from-a-go-template)
 - [buffer blackfriday output](http://grokbase.com/t/gg/golang-nuts/142spmv4fe/go-nuts-differences-between-os-io-ioutils-bufio-bytes-with-buffer-type-packages-for-file-reading)
+- [github markdown file extensions](https://github.com/github/markup/blob/b865add2e053f8cea3d7f4d9dcba001bdfd78994/lib/github/markups.rb#L1)
+- [javascript queryselector](http://caniuse.com/#feat=queryselector)
+- [chaining writers in go](https://medium.com/@skdomino/writing-on-the-train-chaining-io-writers-in-go-1b39e07f71c9)
