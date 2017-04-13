@@ -4,234 +4,157 @@
 		<meta charset="utf-8">
 		<title>{{.Title}}</title>
 		<style>
-
-			/**
-			 * css reset
-			 * html5 display-role reset
-			 * and default styles
-			 */
 			html, body, div, span, object, h1, h2, h3, h4, h5,
 			h6, p, blockquote, pre, a, code, em, img, strong,
 			dl, ol, ul, li, embed, footer, header, menu, nav,
 			time, audio, video, progress {
-			    margin: 0;
-			    padding: 0;
-			    border: 0;
-			    font: inherit;
-			    vertical-align: baseline;
+				margin: 0;
+				padding: 0;
+				border: 0;
+				font: inherit;
+				vertical-align: baseline;
 			}
-			footer, header, menu, nav {
-			    display: block;
-			}
+			footer, header, menu { display: block; }
 			audio, canvas, progress, video {
-			    display: inline-block;
-			    vertical-align: baseline;
+				display: inline-block;
+				vertical-align: baseline;
 			}
-			html {
-			    font-family: helvetica;
-			    font-size: 22px;
-			}
+			html { font-family: helvetica; font-size: 22px; }
 			body {
-			    line-height: 1.4;
-			    color: #333;
-			    background-color: #fff;
+				line-height: 1.4;
+				color: #333;
+				background-color: #fff;
 			}
-			h1 {
-			    font-size: 1.75em;
-			}
-			h2 {
-			    font-size: 1.5em;
-			}
-			h3 {
-			    font-size: 1.25em;
-			}
+			h1 { font-size: 1.75em; }
+			h2 { font-size: 1.5em; }
+			h3 { font-size: 1.25em; }
 			h1, h2, h3, h4, h5, h6 {
-			    font-family: sans-serif, georgia;
-			    margin-top: 20px;
-			    margin-bottom: 12px;
-			    letter-spacing: 2px;
+				font-family: sans-serif, georgia;
+				margin-top: 20px;
+				margin-bottom: 12px;
+				letter-spacing: 2px;
 			}
-			h3, h4 {
-			    margin-top: 15px;
-			    margin-bottom: 10px;
-			}
-			h5, h6 {
-			    margin-top: 10px;
-			}
-			h1, h2 {
-			    font-weight: bolder;
-			}
-			h3, h4, strong, b {
-			    font-weight: bold;
-			}
-			em {
-			    font-style: italic;
-			    font-weight: 200;
-			}
+			h3, h4 { margin-top: 15px; margin-bottom: 10px; }
+			h5, h6 { margin-top: 10px; }
+			h1, h2 { font-weight: bolder; }
+			h3, h4, strong, b { font-weight: bold; }
+			em { font-style: italic; font-weight: 200; }
 			blockquote {
-			    font-family: sans-serif, helvetica;
-			    quotes: none;
-			    padding: 10px 20px;
-			    margin: 0 0 20px;
-			    border-left: 5px solid #eee;
-			    font-style: italic;
+				font-family: sans-serif, helvetica;
+				quotes: none;
+				padding: 10px 20px;
+				margin: 0 0 20px;
+				border-left: 5px solid #eee;
+				font-style: italic;
 			}
 			hr {
-			    height: 0;
-			    margin: 20px 0;
-			    border: 0;
-			    border-top: 1px solid #eee;
+				height: 0;
+				margin: 20px 0;
+				border: 0;
+				border-top: 1px solid #eee;
 			}
-			pre {
-			    font-family: monospace;
-			}
+			pre { font-family: monospace; }
 			code {
-			    padding: 2px 4px;
-			    font-size: 0.9em;
-			    padding: 0.05em 4px;
-			    border-radius: 4px;
-			    background: #000;
-			    overflow-x: auto;
-			    color: #f8f8f8;
+				padding: 2px 4px;
+				font-size: 0.9em;
+				padding: 0.05em 4px;
+				border-radius: 4px;
+				background: #000;
+				overflow-x: auto;
+				color: #f8f8f8;
 			}
 			pre code {
-			    display: block;
-			    margin: 10px 0;
-			    padding: 0.5em;
+				display: block;
+				margin: 10px 0;
+				padding: 0.5em;
 			}
-			ul {
-			    list-style: disc;
-			}
-			ol {
-			    list-style: decimal;
-			}
+			ul { list-style: disc; }
+			ol { list-style: decimal; }
 			li {
-			    margin-left: 45px;
-			    margin-bottom: 5px;
-			    line-height: 1.25;
+				margin-left: 45px;
+				margin-bottom: 5px;
+				line-height: 1.25;
 			}
-			ul, ol, dl, p {
-			    margin-bottom: 10px;
-			}
-			a, a:visited {
-			    color: #337ab7;
-			}
+			ul, ol, dl, p { margin-bottom: 10px; }
+			a, a:visited { color: #337ab7; }
 			a:hover, a:active {
-			    background-color: transparent;
-			    text-decoration: underline;
-			    outline: 0;
-			    color: inherit;
+				background-color: transparent;
+				text-decoration: underline;
+				outline: 0;
+				color: inherit;
 			}
 			a:hover, a:focus {
-			    text-decoration: underline;
-			    color: #23527c;
+				text-decoration: underline;
+				color: #23527c;
 			}
 			a:focus {
-			    outline: thin dotted;
-			    text-decoration: underline;
-			    outline-offset: -2px;
+				outline: thin dotted;
+				text-decoration: underline;
+				outline-offset: -2px;
 			}
 			h1 a, h1 a:visited, h2 a, h2 a:visited, h3 a, h3 a:visited,
 			h4 a, h4 a:visited, strong a, strong a:visited {
-			    color: #444;
-			    text-decoration: underline;
+				color: #444;
+				text-decoration: underline;
 			}
 			img {
-			    display: block;
-			    border: none;
-			    max-width: 100%;
-			    height: auto;
-			    vertical-align: middle;
+				display: block;
+				border: none;
+				max-width: 100%;
+				height: auto;
+				vertical-align: middle;
 			}
-
-			/* containers */
 			header, .content, footer {
-			    max-width: 980px;
-			    margin: 20px auto;
-			    padding: 0 2%;
+				max-width: 980px;
+				margin: 20px auto;
+				padding: 0 2%;
 			}
-
-			/* header & navigation */
 			header>a {
-			    color: #000;
-			    text-decoration: none;
+				color: #000;
+				text-decoration: none;
 			}
-			header h1 {
-			    margin-bottom: 15px;
+			header h1 { margin-bottom: 15px; }
+			nav ul { margin-left: 25px; }
+			nav ul li {
+				font-size: 1.5em;
+				line-height: 2;
+				padding: 0 15px;
 			}
-			nav li {
-			    font-size: 1.5em;
-			    line-height: 2;
-			    padding: 0 15px;
-			    list-style: none;
-			}
-
-			/* footer styles */
-			footer {
-			    text-align: center;
-			}
-
-			/* clearfix */
+			footer { text-align: center; }
 			.group:after {
-			    content: "";
-			    display: table;
-			    clear: both;
+				content: "";
+				display: table;
+				clear: both;
 			}
-
-			/* responsive font sizes and link styles */
 			@media only screen and (min-width: 981px) {
-			    html {
-			        font-size: 19px;
-			    }
+				html { font-size: 19px; }
 			}
 			@media only screen and (min-width: 1200px) {
-			    html {
-			        font-size: 16px;
-			    }
-			    a, a:hover, a:active, a:visited, h1 a, h2 a, h3 a, h4 a, strong a {
-			        text-decoration: none;
-			    }
-			    header h1 {
-			        font-size: 3em;
-			    }
-			    nav li {
-			        display: inline;
-			    }
+				html { font-size: 16px; }
+				a, a:hover, a:active, a:visited, h1 a, h2 a, h3 a, h4 a, strong a {
+					text-decoration: none;
+				}
+				header h1 { font-size: 3em; }
 			}
-
-			/* for print support */
 			@media print {
-			    p, ul, ol, li {
-			        orphans: 5;
-			        widows: 3;
-			    }
-			    ul, ol, blockquote, pre, code {
-			        page-break-inside: avoid;
-			    }
-			    h2, h3, h4 {
-			        page-break-after: avoid;
-			    }
-			    html {
-			        font-size: 1em;
-			    }
-			    body {
-			        background: white;
-			    }
-			    .content {
-			        background: transparent;
-			    }
-			    p a[href^="http"]:after, li a[href^="http"]:after {
-			        content: " (" attr(href) ")";
-			    }
+				p, ul, ol, li { orphans: 5; widows: 3; }
+				ul, ol, blockquote, pre, code {
+					page-break-inside: avoid;
+				}
+				h2, h3, h4 { page-break-after: avoid; }
+				html { font-size: 1em; }
+				body { background: white; }
+				.content { background: transparent; }
+				p a[href^="http"]:after, li a[href^="http"]:after {
+					content: " (" attr(href) ")";
+				}
 			}
-
 		</style>
 	</head>
 	<body>
 		<header>
-			<h2>{{.Title}}</h2>
-			<nav>
-			</nav>
+			<h1>{{.Title}}</h1>
+			<nav></nav>
 		</header>
 
 		<div class="content">{{.Content}}</div>
@@ -240,8 +163,54 @@
 			<p>{{if .Version}}{{.Version}}{{end}}</p>
 			<div class="scripts">
 				<script>
-					// remove absolute path links
-					// automate navigation using headers
+					(function() {
+						var nav = document.querySelector("nav");
+						if (typeof nav === "undefined") {
+							return
+						}
+						var headers = document.querySelectorAll("h1,h2,h3,h4,h5,h6");
+						if (headers.length === 0) {
+							return
+						}
+						var depth = 1, list = document.createElement("ul");
+						var i, l = headers.length;
+						for (i = 0; i < l; i++) {
+							var anchorAddress = "navigation-" + i;
+							var anchor = document.createElement("a");
+							anchor.setAttribute("name", anchorAddress);
+							headers[i].parentNode.insertBefore(anchor, headers[i]);
+							var navName = headers[i].innerText;
+							var listItem = document.createElement("li");
+							var listItemLink = document.createElement("a");
+							listItemLink.appendChild(document.createTextNode(navName));
+							listItemLink.setAttribute("href", "#"+anchorAddress);
+							listItem.appendChild(listItemLink);
+							var tn = headers[i].tagName;
+							var tnl = tn[tn.length-1];
+							if (tnl == depth) {
+								list.appendChild(listItem);
+							} else if (tnl > depth) {
+								do {
+									var nl = document.createElement("ul");
+									list.appendChild(nl);
+									list = nl;
+									depth++;
+								} while (depth != tnl);
+								list.appendChild(listItem);
+							} else if (tnl < depth) {
+								while (depth > tnl) {
+									list = list.parentNode;
+									depth--;
+								}
+								list.appendChild(listItem);
+							}
+						}
+						while (depth > 1) {
+							list = list.parentNode;
+							depth--;
+						}
+						nav.appendChild(list);
+					})()
 				</script>
 			</div>
 		</footer>
