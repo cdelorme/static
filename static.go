@@ -1,68 +1,14 @@
+// This package provides a utility to parse markdown files in lexical order
+// as a single document or individual pages, with no additional requirements.
+//
+// It includes default templates that are embedded, but can be directed to a
+// separate file granting better control for more complex use-cases.
+//
+// Template parameters are simple, and include Title, Content, and Version;
+// both the Version and Title can be changed.  If in web mode, an additional
+// property called Name will be set to the basename of the file.
 package static
 
-import (
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
-)
-
-func init() {
-	runnable = cmd{}
-}
-
-type logger interface {
-	Debug(string, ...interface{})
-	Error(string, ...interface{})
-	Info(string, ...interface{})
-}
-
-type runner interface {
-	Run(string, ...string) ([]byte, error)
-}
-
-var stat = os.Stat
-var isNotExist = os.IsNotExist
-var extensions = []string{".md", ".mkd", ".markdown"}
-var runnable runner
-
-type cmd struct{}
-
-func (self cmd) Run(command string, args ...string) ([]byte, error) {
-	return exec.Command(command, args...).Output()
-}
-
-func exists(path string) (bool, error) {
-	_, err := stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if isNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
-
-func version(dir string) string {
-	version := strconv.FormatInt(time.Now().Unix(), 10)
-	out, err := runnable.Run("sh", "-c", "git", "-C", dir, "rev-parse", "--short", "HEAD")
-	if err == nil {
-		version = strings.Trim(string(out), "\n")
-	}
-	return version
-}
-
-func basename(name string) string {
-	return filepath.Base(strings.TrimSuffix(name, filepath.Ext(name)))
-}
-
-func isMarkdown(path string) bool {
-	for i := range extensions {
-		if strings.HasSuffix(path, extensions[i]) {
-			return true
-		}
-	}
-	return false
-}
+// List of extensions matching the github parser, but with an inversed order
+// so that we pick the shortest extension first.
+var extensions = []string{".md", ".mkd", ".mkdn", ".mdown", ".markdown"}

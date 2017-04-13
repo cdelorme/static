@@ -237,7 +237,7 @@
 		<div class="content">{{.Content}}</div>
 
 		<footer>
-			<p>Created on {{.Date}}{{if .Version}} ({{.Version}}){{end}}</p>
+			<p>{{if .Version}}{{.Version}}{{end}}</p>
 			<div class="scripts">
 				<script>
 					// remove absolute path links

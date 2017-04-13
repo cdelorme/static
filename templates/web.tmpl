@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>{{ if .Name}}{{.Name}} | {{End}}{{.Title}}</title>
+		<title>{{if .Name}}{{.Name}} | {{end}}{{.Title}}</title>
 		<style>
 
 			/**
@@ -233,9 +233,5 @@
 		</header>
 
 		<div class="content">{{.Content}}</div>
-
-		<footer>
-			<p>Created on {{.Date}}{{if .Version}} ({{.Version}}){{end}}</p>
-		</footer>
 	</body>
 </html>
